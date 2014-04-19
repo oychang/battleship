@@ -58,6 +58,19 @@ getaddrinfo_wrapper(struct addrinfo *p)
 }
 //=============================================================================
 void
+handle_info(struct bs_resp * resp, struct bs_session * s)
+{
+    resp->opcode = ABOUT;
+
+    resp->data.session.stage = s->stage;
+
+    strncpy(resp->data.session.names[0], s->names[0], MAX_USERNAME_CHARS);
+    strncpy(resp->data.session.names[1], s->names[1], MAX_USERNAME_CHARS);
+
+    return;
+}
+//=============================================================================
+void
 handle_error(struct bs_resp * resp, string message)
 {
     resp->opcode = ERROR;
@@ -106,7 +119,7 @@ int main(void)
         struct bs_resp rp;
         switch (parse_request(request, &rq)) {
         case INFO:
-            // handle_info(&rp, &rq, &session);
+            handle_info(&rp, &session);
             break;
         case NAME:
             // handle_name(&rp, &rq, &session);
