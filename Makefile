@@ -4,10 +4,7 @@ CFLAGS = -Wall -Wextra -Werror -std=gnu99
 VPATH = src
 
 
-game: game.o
-game.o: game.c
-
-network: network.o
+game.o: game.c game.h
 network.o: network.c network.h
 
 
