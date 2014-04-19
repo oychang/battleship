@@ -15,7 +15,7 @@ pack_request(char * buf, struct bs_req * request)
         // ensure null-terminated
         request->data.name[MAX_USERNAME_CHARS-1] = '\0';
         strncpy(&buf[size], request->data.name, MAX_USERNAME_CHARS);
-        size += strlen(request->data.name);
+        size += strlen(request->data.name) + 1;
         break;
     case PLACE:
         // assume all of these values get implicitly converted to numbers
@@ -44,12 +44,23 @@ pack_response(char * buf, struct bs_resp * response)
     buf[size++] = response->opcode;
     switch (response->opcode) {
     case ABOUT:
+        buf[size++] = response->data.session.stage;
+
+        response->data.session.names[0][MAX_USERNAME_CHARS-1] = '\0';
+        strncpy(&buf[size], response->data.session.names[0],
+            MAX_USERNAME_CHARS);
+        size += strlen(response->data.session.names[0]) + 1;
+
+        response->data.session.names[1][MAX_USERNAME_CHARS-1] = '\0';
+        strncpy(&buf[size], response->data.session.names[1],
+            MAX_USERNAME_CHARS);
+        size += strlen(response->data.session.names[1]) + 1;
         break;
     case ERROR:
         // ensure null-terminated
         response->data.message[MAXSTRING-1] = '\0';
         strncpy(&buf[size], response->data.message, MAXSTRING);
-        size += strlen(response->data.message);
+        size += strlen(response->data.message) + 1;
         break;
     default:
         break;
@@ -84,9 +95,24 @@ parse_request(char * buf, struct bs_req * req)
     return req->opcode;
 }
 
-void
+enum bs_resp_opcode
 parse_response(char * buf, struct bs_resp * resp)
 {
+    resp->opcode = buf[0];
+    switch (buf[0]) {
+    // TODO
+    case ABOUT:
+        // strncpy(&buf[size], response->data.session.names[0],
+        //     MAX_USERNAME_CHARS);
+        // size += strlen(response->data.session.names[0]) + 1;
+        break;
+    case ERROR:
+        strncpy(resp->data.message, &buf[1], MAXSTRING);
+        break;
+    // noops -- these contain no additional data
+    case OK: case WAIT: default:
+        break;
+    }
 
-    printf("%s %d\n", buf, resp->opcode);
+    return resp->opcode;
 }

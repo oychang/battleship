@@ -49,14 +49,14 @@ struct bs_req {
 /* BattleShip Response
  *
  */
+enum bs_resp_opcode {
+    OK = 0,
+    ABOUT = 1,
+    WAIT = 2,
+    ERROR = 3
+};
 struct bs_resp {
-    enum {
-        OK = 0,
-        ABOUT = 1,
-        WAIT = 2,
-        ERROR = 3
-    } opcode;
-
+    enum bs_resp_opcode opcode;
     union {
         string message;
         struct bs_session session;
@@ -67,6 +67,6 @@ size_t pack_request(char * buf, struct bs_req * request);
 size_t pack_response(char * buf, struct bs_resp * response);
 
 enum bs_req_opcode parse_request(char * buf, struct bs_req * request);
-void parse_response(char * buf, struct bs_resp * response);
+enum bs_resp_opcode parse_response(char * buf, struct bs_resp * response);
 //=============================================================================
 #endif
