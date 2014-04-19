@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdbool.h>
 #include <unistd.h>
 
 #include <time.h>
@@ -69,7 +68,13 @@ int main(void)
         return EXIT_FAILURE;
     }
 
-    while (true) {
+    struct bs_session session = {
+        .stage = NOT_ENOUGH_PLAYERS,
+        .names = {"Player 1", "Player 2"},
+        .boards = {{}, {}}
+    };
+
+    while (session.stage != DONE) {
         // Accept connection to server
         int clientfd;
         struct sockaddr_storage client;
@@ -87,14 +92,28 @@ int main(void)
             perror("recv");
             return EXIT_FAILURE;
         }
-        parse_request(request, &rq);
 
-        // TODO: Decide how to respond
-
+        struct bs_resp rp;
+        switch (parse_request(request, &rq)) {
+        case INFO:
+            // handle_info(&rp, &rq, &session);
+            break;
+        case NAME:
+            // handle_name(&rp, &rq, &session);
+            break;
+        case PLACE:
+            // handle_place(&rp, &rq, &session);
+            break;
+        case FIRE:
+            // handle_fire(&rp, &rq, &session);
+            break;
+        default:
+            // handle_error(&rp, "Invalid Opcode");
+            break;
+        }
 
         // Send back to originating client
         buffer response;
-        struct bs_resp rp;
         size_t len = pack_response(response, &rp);
         send(clientfd, response, len, 0);
         close(clientfd);

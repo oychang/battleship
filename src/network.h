@@ -17,6 +17,7 @@ enum game_state {
 struct bs_session {
     enum game_state stage;
     char names[2][MAX_USERNAME_CHARS];
+    board_t boards[2];
 };
 //=============================================================================
 /* BattleShip Request
