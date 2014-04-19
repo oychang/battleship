@@ -1,6 +1,6 @@
 CC = gcc
 LD = $(CC)
-CFLAGS = -Wall -Wextra -Werror -std=gnu99
+CFLAGS = -Wall -Wextra -std=gnu99 #-Werror
 VPATH = src
 
 

@@ -80,6 +80,7 @@ handle_error(struct bs_resp * resp, string message)
     return;
 }
 //=============================================================================
+// TODO: implement
 void
 handle_name(struct bs_resp * resp, struct bs_req * rq, struct bs_session * s)
 {
@@ -91,9 +92,37 @@ handle_name(struct bs_resp * resp, struct bs_req * rq, struct bs_session * s)
     // TODO: which player get's to be which
     resp->opcode = OK;
 
+    s->players += 1;
+    return;
+}
+//=============================================================================
+// TODO: implement
+void
+handle_place(struct bs_resp * resp, struct bs_req * rq, struct bs_session * s)
+{
+    return;
+}
+//=============================================================================
+// TODO: implement
+void
+handle_fire(struct bs_resp * resp, struct bs_req * rq, struct bs_session * s)
+{
+    // Get player, then work with opponent's board
+    // Check if already taken
+    // Check if a hit
+    // It's a miss
 
+    // Handle current player
+    // Still current player if already taken
+    // Multiple shots if a hit
 
     return;
+}
+//=============================================================================
+int
+right_sockfd(struct bs_session * s, int sockfd)
+{
+    return 0;
 }
 //=============================================================================
 int main(void)
@@ -110,7 +139,11 @@ int main(void)
     struct bs_session session = {
         .stage = NOT_ENOUGH_PLAYERS,
         .names = {"Player 1", "Player 2"},
-        .boards = {{}, {}}
+        .players = 0,
+
+        .current_player = -1,
+        .boards = {{}, {}},
+        .sockets = {0, 0}
     };
 
     while (session.stage != DONE) {
@@ -123,6 +156,8 @@ int main(void)
             perror("accept");
             return EXIT_FAILURE;
         }
+
+        // TODO: check socket
 
         // Get request
         buffer request;
@@ -138,13 +173,14 @@ int main(void)
             handle_info(&rp, &session);
             break;
         case NAME:
+            // TODO: add socket to session
             handle_name(&rp, &rq, &session);
             break;
         case PLACE:
-            // handle_place(&rp, &rq, &session);
+            handle_place(&rp, &rq, &session);
             break;
         case FIRE:
-            // handle_fire(&rp, &rq, &session);
+            handle_fire(&rp, &rq, &session);
             break;
         default:
             handle_error(&rp, "Invalid Opcode");
