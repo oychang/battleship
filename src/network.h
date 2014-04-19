@@ -65,5 +65,8 @@ struct bs_resp {
 //=============================================================================
 size_t pack_request(char * buf, struct bs_req * request);
 size_t pack_response(char * buf, struct bs_resp * response);
+
+void parse_request(char * buf, struct bs_req * request);
+void parse_response(char * buf, struct bs_resp * response);
 //=============================================================================
 #endif

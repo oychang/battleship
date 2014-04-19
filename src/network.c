@@ -56,3 +56,15 @@ pack_response(char * buf, struct bs_resp * response)
 
     return size;
 }
+
+void
+parse_request(char * buf, struct bs_req * request)
+{
+
+}
+
+void
+parse_response(char * buf, struct bs_resp * response)
+{
+
+}
