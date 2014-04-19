@@ -1,4 +1,3 @@
-#include <stdio.h> // temporary
 #include <string.h>
 #include "network.h"
 

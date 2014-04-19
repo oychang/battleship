@@ -80,6 +80,22 @@ handle_error(struct bs_resp * resp, string message)
     return;
 }
 //=============================================================================
+void
+handle_name(struct bs_resp * resp, struct bs_req * rq, struct bs_session * s)
+{
+    if (s->players == 2) {
+        handle_error(resp, "Too many players");
+        return;
+    }
+
+    // TODO: which player get's to be which
+    resp->opcode = OK;
+
+
+
+    return;
+}
+//=============================================================================
 int main(void)
 {
     struct addrinfo server;
@@ -122,7 +138,7 @@ int main(void)
             handle_info(&rp, &session);
             break;
         case NAME:
-            // handle_name(&rp, &rq, &session);
+            handle_name(&rp, &rq, &session);
             break;
         case PLACE:
             // handle_place(&rp, &rq, &session);

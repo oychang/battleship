@@ -15,9 +15,14 @@ enum game_state {
 };
 //=============================================================================
 struct bs_session {
+    // Public fields
     enum game_state stage;
     char names[2][MAX_USERNAME_CHARS];
+    char players;
+
+    // Private fields
     board_t boards[2];
+    int sockets[2];
 };
 //=============================================================================
 /* BattleShip Request
