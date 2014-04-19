@@ -57,6 +57,16 @@ getaddrinfo_wrapper(struct addrinfo *p)
     return sockfd;
 }
 //=============================================================================
+void
+handle_error(struct bs_resp * resp, string message)
+{
+    resp->opcode = ERROR;
+
+    message[MAXSTRING-1] = '\0';
+    strncpy(resp->data.message, message, MAXSTRING);
+    return;
+}
+//=============================================================================
 int main(void)
 {
     struct addrinfo server;
@@ -108,7 +118,7 @@ int main(void)
             // handle_fire(&rp, &rq, &session);
             break;
         default:
-            // handle_error(&rp, "Invalid Opcode");
+            handle_error(&rp, "Invalid Opcode");
             break;
         }
 
