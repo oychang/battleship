@@ -1,0 +1,10 @@
+Project 4: Battleship! on-line
+Due: Monday, 28 April
+Write client and server code for an on-line version of Battleship
+This project tests also you ability to design a protocol
+Have a server that keeps track so players can't cheat.
+When it is the player's turn, the interaction is client-server.
+When the player is waiting, it will wait indefinitely on the server which can cause problems.
+Your protocol will have to include abandoning the game, error notifications, start of game notification, etc.
+Work in pairs.
+This is a fun project; please start early because you will probably have to throw one away.
