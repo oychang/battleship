@@ -100,11 +100,11 @@ parse_response(char * buf, struct bs_resp * resp)
 {
     resp->opcode = buf[0];
     switch (buf[0]) {
-    // TODO
     case ABOUT:
-        // strncpy(&buf[size], response->data.session.names[0],
-        //     MAX_USERNAME_CHARS);
-        // size += strlen(response->data.session.names[0]) + 1;
+        strncpy(resp->data.session.names[0], &buf[1], MAX_USERNAME_CHARS);
+        strncpy(resp->data.session.names[1],
+            &buf[1 + strlen(resp->data.session.names[0]) + 1],
+            MAX_USERNAME_CHARS);
         break;
     case ERROR:
         strncpy(resp->data.message, &buf[1], MAXSTRING);
