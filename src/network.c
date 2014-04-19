@@ -1,3 +1,4 @@
+#include <stdio.h> // temporary
 #include <string.h>
 #include "network.h"
 
@@ -60,11 +61,11 @@ pack_response(char * buf, struct bs_resp * response)
 void
 parse_request(char * buf, struct bs_req * request)
 {
-
+    printf("%s %d\n", buf, request->opcode);
 }
 
 void
 parse_response(char * buf, struct bs_resp * response)
 {
-
+    printf("%s %d\n", buf, response->opcode);
 }

@@ -80,18 +80,21 @@ int main(void)
             return EXIT_FAILURE;
         }
 
-        // Get request into buffer
+        // Get request
         buffer request;
+        struct bs_req rq;
         if ((recv(clientfd, request, MAXBUF, 0)) == -1) {
             perror("recv");
             return EXIT_FAILURE;
         }
+        parse_request(request, &rq);
 
-        // struct bs_req rq;
-        struct bs_resp rp;
+        // TODO: Decide how to respond
+
 
         // Send back to originating client
         buffer response;
+        struct bs_resp rp;
         size_t len = pack_response(response, &rp);
         send(clientfd, response, len, 0);
         close(clientfd);
