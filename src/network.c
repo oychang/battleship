@@ -58,14 +58,35 @@ pack_response(char * buf, struct bs_resp * response)
     return size;
 }
 
-void
-parse_request(char * buf, struct bs_req * request)
+enum bs_req_opcode
+parse_request(char * buf, struct bs_req * req)
 {
-    printf("%s %d\n", buf, request->opcode);
+    req->opcode = buf[0];
+    switch (buf[0]) {
+    case NAME:
+        strncpy(req->data.name, &buf[1], MAX_USERNAME_CHARS);
+        break;
+    case PLACE:
+        req->data.ship.type = buf[1];
+        req->data.ship.orientation = buf[2];
+        req->data.ship.coord[0] = buf[3];
+        req->data.ship.coord[1] = buf[4];
+        break;
+    case FIRE:
+        req->data.coord[0] = buf[1];
+        req->data.coord[1] = buf[2];
+        break;
+    // noops -- these contain no additional data
+    case INFO: default:
+        break;
+    }
+
+    return req->opcode;
 }
 
 void
-parse_response(char * buf, struct bs_resp * response)
+parse_response(char * buf, struct bs_resp * resp)
 {
-    printf("%s %d\n", buf, response->opcode);
+
+    printf("%s %d\n", buf, resp->opcode);
 }

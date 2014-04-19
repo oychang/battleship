@@ -27,14 +27,14 @@ struct bs_session {
  * 3 = FIRE = put a shot at the coord
  * note, there is no way to request the board for either player
  */
+enum bs_req_opcode {
+    INFO = 0,
+    NAME = 1,
+    PLACE = 2,
+    FIRE = 3
+};
 struct bs_req {
-    enum {
-        INFO = 0,
-        NAME = 1,
-        PLACE = 2,
-        FIRE = 3
-    } opcode;
-
+    enum bs_req_opcode opcode;
     union {
         char          name[MAX_USERNAME_CHARS];
         unsigned char coord[2];
@@ -66,7 +66,7 @@ struct bs_resp {
 size_t pack_request(char * buf, struct bs_req * request);
 size_t pack_response(char * buf, struct bs_resp * response);
 
-void parse_request(char * buf, struct bs_req * request);
+enum bs_req_opcode parse_request(char * buf, struct bs_req * request);
 void parse_response(char * buf, struct bs_resp * response);
 //=============================================================================
 #endif
