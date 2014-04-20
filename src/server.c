@@ -36,10 +36,14 @@ getaddrinfo_wrapper(struct addrinfo *p)
 
     // getaddrinfo() returns a linked list of results
     int sockfd;
+    static const int yes = 1;
     for (p = results; p != NULL; p = p->ai_next) {
         if ((sockfd = socket(p->ai_family, p->ai_socktype,
                 p->ai_protocol)) == -1) {
             continue;
+        } else if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR,
+                              &yes, sizeof(int)) == -1) {
+            perror("setsockopt");
         } else if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
             close(sockfd);
             continue;
@@ -48,12 +52,11 @@ getaddrinfo_wrapper(struct addrinfo *p)
     }
     freeaddrinfo(results);
 
-    if (p == NULL)
+    if (p == NULL) {
+        fprintf(stderr, "failed to bind socket\n");
         return -1;
+    }
 
-    static const int yes = 1;
-    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
-        perror("setsockopt");
     return sockfd;
 }
 //=============================================================================
