@@ -35,10 +35,11 @@ struct bs_session {
  * note, there is no way to request the board for either player
  */
 enum bs_req_opcode {
-    INFO = 0,
-    NAME = 1,
-    PLACE = 2,
-    FIRE = 3
+    CONNECT = 0,
+    INFO = 1,
+    NAME = 2,
+    PLACE = 3,
+    FIRE = 4
 };
 struct bs_req {
     enum bs_req_opcode opcode;

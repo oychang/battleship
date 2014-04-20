@@ -8,8 +8,6 @@ pack_request(char * buf, struct bs_req * request)
 
     buf[size++] = request->opcode;
     switch (request->opcode) {
-    case INFO:
-        break;
     case NAME:
         // ensure null-terminated
         request->data.name[MAX_USERNAME_CHARS-1] = '\0';
@@ -28,7 +26,7 @@ pack_request(char * buf, struct bs_req * request)
         buf[size++] = request->data.coord[0];
         buf[size++] = request->data.coord[1];
         break;
-    default:
+    case CONNECT: case INFO: default:
         break;
     }
 
@@ -61,7 +59,7 @@ pack_response(char * buf, struct bs_resp * response)
         strncpy(&buf[size], response->data.message, MAXSTRING);
         size += strlen(response->data.message) + 1;
         break;
-    default:
+    case OK: case WAIT: default:
         break;
     }
 
@@ -87,7 +85,7 @@ parse_request(char * buf, struct bs_req * req)
         req->data.coord[1] = buf[2];
         break;
     // noops -- these contain no additional data
-    case INFO: default:
+    case CONNECT: case INFO: default:
         break;
     }
 
