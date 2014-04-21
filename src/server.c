@@ -173,7 +173,7 @@ select_wrapper(fd_set * master, int * nfds, int serverfd,
                 &addrlen);
             if (clientfd == -1) {
                 perror("accept");
-                return EXIT_FAILURE;
+                return -1;
             }
 
             // Add to our set of connections
@@ -181,16 +181,20 @@ select_wrapper(fd_set * master, int * nfds, int serverfd,
             if (clientfd > *nfds)
                 *nfds = clientfd;
 
+            printf("connect\n");
+
             return clientfd;
         // if data to read & not the server
         } else {
             int recvbytes = recv(fd, buf, sizeof(buf), 0);
 
             if (recvbytes <= 0) {
+                printf("close\n");
                 close(fd);
                 FD_CLR(fd, master);
             }
 
+            printf("data from previously connected\n");
             return fd;
         }
     }
@@ -206,15 +210,19 @@ int main(void)
     if (serverfd == -1)
         return EXIT_FAILURE;
 
-    // Setup initial game state
+    // Setup initial game data
     struct bs_session session = {
-        .stage = NOT_ENOUGH_PLAYERS,
+        .stage = PLACING_SHIPS,
         .names = {"Player 1", "Player 2"},
         .players = 0,
 
         .current_player = -1,
         .boards = {{}, {}},
     };
+    // int sockets[2] = {-1, -1};
+    buffer request;
+    // struct bs_req rq;
+    // struct bs_resp rp;
 
     // Setup file descriptor sets for use with select().
     // http://beej.us/guide/bgnet/output/html/multipage/advanced.html
@@ -225,16 +233,19 @@ int main(void)
     int nfds = serverfd;
 
     while (session.stage != DONE) {
-        buffer request;
         int sock = select_wrapper(&master, &nfds, serverfd, &session, request);
+
         if (sock == -1) {
-            printf("bad sock\n");
+            fprintf(stderr, "select() network error\n");
             continue;
         }
+        printf("%d\n", sock);
+
+        // TODO: check sock == -2, check disconnect
+        // check and assign player numbers
+
 
 /*      // Get request
-        struct bs_req rq;
-        struct bs_resp rp;
         switch (parse_request(request, &rq)) {
         case CONNECT:
             handle_connect(&rp, &session);

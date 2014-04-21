@@ -16,23 +16,12 @@
 #define PORT "5000"
 #define MAXDATASIZE 100 // max number of bytes we can get at once
 
-// get sockaddr, IPv4 or IPv6:
-void *get_in_addr(struct sockaddr *sa)
-{
-    if (sa->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
-
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
-
 int main(int argc, char *argv[])
 {
     int sockfd;//, numbytes;
     char buf[MAXDATASIZE];
     struct addrinfo hints, *servinfo, *p;
     int rv;
-    char s[INET6_ADDRSTRLEN];
 
     if (argc != 2) {
         fprintf(stderr,"usage: client hostname\n");
@@ -56,6 +45,7 @@ int main(int argc, char *argv[])
             continue;
         }
 
+        // Connect
         if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
             close(sockfd);
             perror("client: connect");
@@ -70,29 +60,23 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-    inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr),
-            s, sizeof s);
-    printf("client: connecting to %s\n", s);
-
     freeaddrinfo(servinfo); // all done with this structure
 
-
+    // Send
     struct bs_req req = {
         .opcode = CONNECT
     };
     size_t len = pack_request(buf, &req);
-
     send(sockfd, buf, len, 0);
 
-    // if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
-    //     perror("recv");
-    //     exit(1);
-    // }
+    int numbytes;
+    if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
+        perror("recv");
+        exit(1);
+    }
+    buf[numbytes] = '\0';
 
-    // buf[numbytes] = '\0';
-
-    printf("client: received '%s'\n",buf);
-
+    // Close
     close(sockfd);
 
     return 0;
