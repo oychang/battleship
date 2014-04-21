@@ -11,17 +11,20 @@
 
 #include "server.h"
 //=============================================================================
-/* Get a valid socket to listen use with PORT.
+/* Get a valid socket for PORT & listen.
  * Returns -1 if failed to get a socket, otherwise a valid
- * bound socket file descriptor.
+ * bound & listening socket file descriptor.
  *
  * References:
  * http://www.beej.us/guide/bgnet/output/html/multipage/getaddrinfoman.html
  * http://www.beej.us/guide/bgnet/output/html/multipage/acceptman.html
  */
 int
-getaddrinfo_wrapper(struct addrinfo *p)
+setup_server()
 {
+    struct addrinfo server;
+    struct addrinfo * p = &server;
+
     struct addrinfo hints, *results;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
@@ -50,10 +53,14 @@ getaddrinfo_wrapper(struct addrinfo *p)
         } else
             break;
     }
+
     freeaddrinfo(results);
 
     if (p == NULL) {
         fprintf(stderr, "failed to bind socket\n");
+        return -1;
+    } else if (listen(sockfd, BACKLOG) == -1) {
+        perror("listen");
         return -1;
     }
 
@@ -131,15 +138,13 @@ handle_connect(struct bs_resp * resp, struct bs_session * s)
 //=============================================================================
 int main(void)
 {
-    struct addrinfo server;
-    int serverfd = getaddrinfo_wrapper(&server);
+
+    // Get a socket to listen on PORT
+    const int serverfd = setup_server();
     if (serverfd == -1)
         return EXIT_FAILURE;
-    if (listen(serverfd, BACKLOG) == -1) {
-        perror("listen");
-        return EXIT_FAILURE;
-    }
 
+    // Setup initial game state
     struct bs_session session = {
         .stage = NOT_ENOUGH_PLAYERS,
         .names = {"Player 1", "Player 2"},
