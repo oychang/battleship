@@ -14,6 +14,7 @@ enum game_state {
     DONE = 3
 };
 //=============================================================================
+#define MAX_PLAYERS 2
 struct bs_session {
     // Public fields
     enum game_state stage;
