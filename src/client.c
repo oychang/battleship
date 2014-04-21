@@ -10,7 +10,7 @@
 #include <arpa/inet.h>
 
 
-#include "network.h"
+#include "protocol.h"
 #include "game.h"
 
 #define PORT "5000"

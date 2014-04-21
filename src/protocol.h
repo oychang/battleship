@@ -1,5 +1,5 @@
-#ifndef NETWORK_H
-#define NETWORK_H
+#ifndef PROTOCOL_H
+#define PROTOCOL_H
 
 #include "game.h" // board_t
 //=============================================================================

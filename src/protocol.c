@@ -1,5 +1,5 @@
 #include <string.h>
-#include "network.h"
+#include "protocol.h"
 
 size_t
 pack_request(char * buf, struct bs_req * request)
