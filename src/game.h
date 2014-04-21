@@ -21,6 +21,7 @@ enum cell {
     CRUISER = 5, BATTLESHIP = 6,
     CARRIER = 7
 };
+enum orientation {HORIZONTAL = 0, VERTICAL = 1};
 //=============================================================================
 typedef enum cell board_t[COLUMNS][ROWS];
 //=============================================================================
