@@ -138,8 +138,8 @@ handle_connect(struct bs_resp * resp, struct bs_session * s)
 /* Wraps around the setup nastiness that select() requires.
  * Returns...
  * -1 if network error,
- * -2 if attempting to join an in progress game,
- * sockfd if a good connection or dropped connection
+ * -2 if disconnect
+ * sockfd if a good connection or dropped connection or too many
  */
 int
 select_wrapper(fd_set * master, int * nfds, int serverfd,
@@ -164,7 +164,7 @@ select_wrapper(fd_set * master, int * nfds, int serverfd,
         // if data to read & it's the server, i.e. new connection
         } else if (fd == serverfd) {
             if (s->stage != NOT_ENOUGH_PLAYERS)
-                return -2; // attempt to join game in progress
+                return fd; // attempt to join game in progress
 
             // Accept the connection
             struct sockaddr_storage client;
@@ -192,6 +192,7 @@ select_wrapper(fd_set * master, int * nfds, int serverfd,
                 printf("close\n");
                 close(fd);
                 FD_CLR(fd, master);
+                return -2;
             }
 
             printf("data from previously connected\n");
@@ -219,7 +220,7 @@ int main(void)
         .current_player = -1,
         .boards = {{}, {}},
     };
-    // int sockets[2] = {-1, -1};
+    int sockets[2] = {-1, -1};
     buffer request;
     // struct bs_req rq;
     // struct bs_resp rp;
@@ -234,16 +235,22 @@ int main(void)
 
     while (session.stage != DONE) {
         int sock = select_wrapper(&master, &nfds, serverfd, &session, request);
+        printf("%d\n", sock);
 
+        int whichplayer = -1;
         if (sock == -1) {
             fprintf(stderr, "select() network error\n");
             continue;
+        } else if (sock == -2) {
+            // TODO: prepare fins, send to all remaining socks
+            session.stage = DONE;
+            continue;
+        } else if (!(sock == sockets[0] || sock == sockets[1])) {
+            // TODO: prepare error, send to sock
+            continue;
+        } else {
+            whichplayer = (sock == sockets[0] ? 0 : 1);
         }
-        printf("%d\n", sock);
-
-        // TODO: check sock == -2, check disconnect
-        // check and assign player numbers
-
 
 /*      // Get request
         switch (parse_request(request, &rq)) {
@@ -267,7 +274,6 @@ int main(void)
             break;
         }*/
 
-        // Send back to originating client
         /*buffer response;
         size_t len = pack_response(response, &rp);
         send(clientfd, response, len, 0);*/
