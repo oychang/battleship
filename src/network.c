@@ -59,7 +59,7 @@ pack_response(char * buf, struct bs_resp * response)
         strncpy(&buf[size], response->data.message, MAXSTRING);
         size += strlen(response->data.message) + 1;
         break;
-    case OK: case WAIT: default:
+    case FIN: case OK: case WAIT: default:
         break;
     }
 
@@ -107,7 +107,7 @@ parse_response(char * buf, struct bs_resp * resp)
         strncpy(resp->data.message, &buf[1], MAXSTRING);
         break;
     // noops -- these contain no additional data
-    case OK: case WAIT: default:
+    case FIN: case OK: case WAIT: default:
         break;
     }
 

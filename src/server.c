@@ -237,23 +237,33 @@ int main(void)
         int sock = select_wrapper(&master, &nfds, serverfd, &session, request);
         printf("%d\n", sock);
 
-        int whichplayer = -1;
+        int player_number = -1;
+        // if no useful data
         if (sock == -1) {
             fprintf(stderr, "select() network error\n");
             continue;
+        // if disconnect
         } else if (sock == -2) {
             // TODO: prepare fins, send to all remaining socks
             session.stage = DONE;
             continue;
+        // if too many connections
         } else if (!(sock == sockets[0] || sock == sockets[1])) {
             // TODO: prepare error, send to sock
             continue;
+        // if good initial connection
+        } else if (session.stage == NOT_ENOUGH_PLAYERS) {
+            sockets[session.players++] = sock;
+            player_number = session.players - 1;
+            if (session.players == 2)
+                session.stage = PLACING_SHIPS;
+        // if good subsequent connection
         } else {
-            whichplayer = (sock == sockets[0] ? 0 : 1);
+            player_number = (sock == sockets[0] ? 0 : 1);
         }
 
-/*      // Get request
-        switch (parse_request(request, &rq)) {
+        // Get request
+/*        switch (parse_request(request, &rq)) {
         case CONNECT:
             handle_connect(&rp, &session);
         case INFO:
