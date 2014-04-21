@@ -67,7 +67,7 @@ setup_server()
     return sockfd;
 }
 //=============================================================================
-void
+/*void
 handle_info(struct bs_resp * resp, struct bs_session * s)
 {
     resp->opcode = ABOUT;
@@ -78,9 +78,9 @@ handle_info(struct bs_resp * resp, struct bs_session * s)
     strncpy(resp->data.session.names[1], s->names[1], MAX_USERNAME_CHARS);
 
     return;
-}
+}*/
 //=============================================================================
-void
+/*void
 handle_error(struct bs_resp * resp, string message)
 {
     resp->opcode = ERROR;
@@ -88,10 +88,10 @@ handle_error(struct bs_resp * resp, string message)
     message[MAXSTRING-1] = '\0';
     strncpy(resp->data.message, message, MAXSTRING);
     return;
-}
+}*/
 //=============================================================================
 // TODO: implement
-void
+/*void
 handle_name(struct bs_resp * resp, struct bs_req * rq, struct bs_session * s)
 {
     if (s->players == 2) {
@@ -102,17 +102,17 @@ handle_name(struct bs_resp * resp, struct bs_req * rq, struct bs_session * s)
     resp->opcode = OK;
 
     return;
-}
+}*/
 //=============================================================================
 // TODO: implement
-void
+/*void
 handle_place(struct bs_resp * resp, struct bs_req * rq, struct bs_session * s)
 {
     return;
-}
+}*/
 //=============================================================================
 // TODO: implement
-void
+/*void
 handle_fire(struct bs_resp * resp, struct bs_req * rq, struct bs_session * s)
 {
     // Get player, then work with opponent's board
@@ -125,16 +125,78 @@ handle_fire(struct bs_resp * resp, struct bs_req * rq, struct bs_session * s)
     // Multiple shots if a hit
 
     return;
-}
+}*/
 //=============================================================================
-void
+/*void
 handle_connect(struct bs_resp * resp, struct bs_session * s)
 {
     s->players++;
     resp->opcode = OK;
     return;
-}
+}*/
+//=============================================================================
+/* Wraps around the setup nastiness that select() requires.
+ * Returns...
+ * -1 if network error,
+ * -2 if attempting to join an in progress game,
+ * sockfd if a good connection or dropped connection
+ */
+int
+select_wrapper(fd_set * master, int * nfds, int serverfd,
+    struct bs_session * s, char * buf)
+{
+    // Copy list
+    // TODO: check if this actually works
+    fd_set readfds;
+    FD_ZERO(&readfds);
+    readfds = *master;
+    if (select((*nfds)+1, &readfds, NULL, NULL, NULL) == -1) {
+        perror("select");
+        return -1; // network error
+    }
 
+    // Run through the sets from select() for data
+    int fd;
+    for (fd = 0; fd <= *nfds; fd++) {
+        // if file descriptor has no data to read
+        if (!FD_ISSET(fd, &readfds)) {
+            continue;
+        // if data to read & it's the server, i.e. new connection
+        } else if (fd == serverfd) {
+            if (s->stage != NOT_ENOUGH_PLAYERS)
+                return -2; // attempt to join game in progress
+
+            // Accept the connection
+            struct sockaddr_storage client;
+            socklen_t addrlen = sizeof(client);
+            int clientfd = accept(serverfd, (struct sockaddr *)&client,
+                &addrlen);
+            if (clientfd == -1) {
+                perror("accept");
+                return EXIT_FAILURE;
+            }
+
+            // Add to our set of connections
+            FD_SET(clientfd, master);
+            if (clientfd > *nfds)
+                *nfds = clientfd;
+
+            return clientfd;
+        // if data to read & not the server
+        } else {
+            int recvbytes = recv(fd, buf, sizeof(buf), 0);
+
+            if (recvbytes <= 0) {
+                close(fd);
+                FD_CLR(fd, master);
+            }
+
+            return fd;
+        }
+    }
+
+    return -1;
+}
 //=============================================================================
 int main(void)
 {
@@ -154,24 +216,24 @@ int main(void)
         .boards = {{}, {}},
     };
 
+    // Setup file descriptor sets for use with select().
+    // http://beej.us/guide/bgnet/output/html/multipage/advanced.html
+    fd_set master;
+    FD_ZERO(&master);
+    // Add server to fd list
+    FD_SET(serverfd, &master);
+    int nfds = serverfd;
+
     while (session.stage != DONE) {
-        int clientfd;
-        struct sockaddr_storage client;
-        socklen_t addrlen = sizeof(struct sockaddr_storage);
-        if ((clientfd = accept(serverfd, (struct sockaddr *)&client,
-                &addrlen)) == -1) {
-            perror("accept");
-            return EXIT_FAILURE;
-        }
-
-        // Get request
         buffer request;
-        struct bs_req rq;
-        if ((recv(clientfd, request, MAXBUF, 0)) == -1) {
-            perror("recv");
-            return EXIT_FAILURE;
+        int sock = select_wrapper(&master, &nfds, serverfd, &session, request);
+        if (sock == -1) {
+            printf("bad sock\n");
+            continue;
         }
 
+/*      // Get request
+        struct bs_req rq;
         struct bs_resp rp;
         switch (parse_request(request, &rq)) {
         case CONNECT:
@@ -192,13 +254,12 @@ int main(void)
         default:
             handle_error(&rp, "Invalid Opcode");
             break;
-        }
+        }*/
 
         // Send back to originating client
         /*buffer response;
         size_t len = pack_response(response, &rp);
         send(clientfd, response, len, 0);*/
-        close(clientfd);
     }
 
     close(serverfd);
