@@ -80,7 +80,7 @@ handle_info(struct bs_resp * resp, struct bs_session * s)
     return;
 }*/
 //=============================================================================
-/*void
+void
 handle_error(struct bs_resp * resp, string message)
 {
     resp->opcode = ERROR;
@@ -88,7 +88,7 @@ handle_error(struct bs_resp * resp, string message)
     message[MAXSTRING-1] = '\0';
     strncpy(resp->data.message, message, MAXSTRING);
     return;
-}*/
+}
 //=============================================================================
 // TODO: implement
 /*void
@@ -235,9 +235,7 @@ int main(void)
 
     while (session.stage != DONE) {
         int sock = select_wrapper(&master, &nfds, serverfd, &session, request);
-        printf("%d\n", sock);
 
-        int player_number = -1;
         // if no useful data
         if (sock == -1) {
             fprintf(stderr, "select() network error\n");
@@ -254,35 +252,43 @@ int main(void)
         // if good initial connection
         } else if (session.stage == NOT_ENOUGH_PLAYERS) {
             sockets[session.players++] = sock;
-            player_number = session.players - 1;
-            if (session.players == 2)
+            if (session.players == 2) {
                 session.stage = PLACING_SHIPS;
-        // if good subsequent connection
-        } else {
-            player_number = (sock == sockets[0] ? 0 : 1);
+                session.current_player = 0;
+            }
+        }
+
+        int player_number = (sock == sockets[0] ? 0 : 1);
+        if (session.players < 2) {
+            // TODO: the initial wait case
+            continue;
+        } else if (session.stage == PLAYING
+                   && session.current_player != player_number) {
+            // TODO: the subsequent wait case
+            continue;
         }
 
         // Get request
-/*        switch (parse_request(request, &rq)) {
-        case CONNECT:
-            handle_connect(&rp, &session);
-        case INFO:
-            handle_info(&rp, &session);
-            break;
-        case NAME:
-            // TODO: add socket to session
-            handle_name(&rp, &rq, &session);
-            break;
-        case PLACE:
-            handle_place(&rp, &rq, &session);
-            break;
-        case FIRE:
-            handle_fire(&rp, &rq, &session);
-            break;
+        switch (parse_request(request, &rq)) {
+        // case CONNECT:
+        //     handle_connect(&rp, &session);
+        // case INFO:
+        //     handle_info(&rp, &session);
+        //     break;
+        // case NAME:
+        //     // TODO: add socket to session
+        //     handle_name(&rp, &rq, &session);
+        //     break;
+        // case PLACE:
+        //     handle_place(&rp, &rq, &session);
+        //     break;
+        // case FIRE:
+        //     handle_fire(&rp, &rq, &session);
+        //     break;
         default:
             handle_error(&rp, "Invalid Opcode");
             break;
-        }*/
+        }
 
         /*buffer response;
         size_t len = pack_response(response, &rp);
