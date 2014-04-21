@@ -92,10 +92,8 @@ handle_name(struct bs_resp * resp, struct bs_req * rq, struct bs_session * s)
         return;
     }
 
-    // TODO: which player get's to be which
     resp->opcode = OK;
 
-    s->players += 1;
     return;
 }
 //=============================================================================
@@ -122,11 +120,14 @@ handle_fire(struct bs_resp * resp, struct bs_req * rq, struct bs_session * s)
     return;
 }
 //=============================================================================
-int
-right_sockfd(struct bs_session * s, int sockfd)
+void
+handle_connect(struct bs_resp * resp, struct bs_session * s)
 {
-    return 0;
+    s->players++;
+    resp->opcode = OK;
+    return;
 }
+
 //=============================================================================
 int main(void)
 {
@@ -146,11 +147,9 @@ int main(void)
 
         .current_player = -1,
         .boards = {{}, {}},
-        .sockets = {0, 0}
     };
 
     while (session.stage != DONE) {
-        // Accept connection to server
         int clientfd;
         struct sockaddr_storage client;
         socklen_t addrlen = sizeof(struct sockaddr_storage);
@@ -159,8 +158,6 @@ int main(void)
             perror("accept");
             return EXIT_FAILURE;
         }
-
-        // TODO: check socket
 
         // Get request
         buffer request;
@@ -172,6 +169,8 @@ int main(void)
 
         struct bs_resp rp;
         switch (parse_request(request, &rq)) {
+        case CONNECT:
+            handle_connect(&rp, &session);
         case INFO:
             handle_info(&rp, &session);
             break;
@@ -191,9 +190,9 @@ int main(void)
         }
 
         // Send back to originating client
-        buffer response;
+        /*buffer response;
         size_t len = pack_response(response, &rp);
-        send(clientfd, response, len, 0);
+        send(clientfd, response, len, 0);*/
         close(clientfd);
     }
 

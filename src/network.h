@@ -1,7 +1,7 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-#include "game.h"
+#include "game.h" // board_t
 //=============================================================================
 #define MAXSTRING 64
 #define MAX_USERNAME_CHARS 8
@@ -18,12 +18,11 @@ struct bs_session {
     // Public fields
     enum game_state stage;
     char names[2][MAX_USERNAME_CHARS];
-    char players;
+    int players;
 
     // Private fields
-    char current_player;
+    int current_player;
     board_t boards[2];
-    int sockets[2];
 };
 //=============================================================================
 /* BattleShip Request
