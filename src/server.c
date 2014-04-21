@@ -211,6 +211,14 @@ int main(void)
     if (serverfd == -1)
         return EXIT_FAILURE;
 
+    // Setup file descriptor sets for use with select().
+    // http://beej.us/guide/bgnet/output/html/multipage/advanced.html
+    fd_set master;
+    FD_ZERO(&master);
+    // Add server to fd list
+    FD_SET(serverfd, &master);
+    int nfds = serverfd;
+
     // Setup initial game data
     struct bs_session session = {
         .stage = PLACING_SHIPS,
@@ -222,16 +230,8 @@ int main(void)
     };
     int sockets[2] = {-1, -1};
     buffer request;
-    // struct bs_req rq;
-    // struct bs_resp rp;
-
-    // Setup file descriptor sets for use with select().
-    // http://beej.us/guide/bgnet/output/html/multipage/advanced.html
-    fd_set master;
-    FD_ZERO(&master);
-    // Add server to fd list
-    FD_SET(serverfd, &master);
-    int nfds = serverfd;
+    struct bs_req rq;
+    struct bs_resp rp;
 
     while (session.stage != DONE) {
         int sock = select_wrapper(&master, &nfds, serverfd, &session, request);
