@@ -88,7 +88,7 @@ struct bs_req {
 // of the following opcodes:
 // 0 = ok
 //     Acknowledgment of receiving a request, successfully executed.
-//     This is the response to a CONNECT, and well-formed NAME.
+//     This is the response to a CONNECT, and well-formed NAME, good FIRE.
 //     No other data is returned.
 // 1 = about
 //     Response contains information about the game session.
@@ -99,26 +99,20 @@ struct bs_req {
 //     In the game, we operate lock-step with each player going about their
 //     business in sequence.
 //     This is the response to any request.
-// 3 = hit
-//     Player successfully scored a hit on the desired cell.
-//     This is the response to a FIRE.
-//     No other data is returned.
-// 4 = miss
+// 3 = nok (not ok)
 //     Player missed a hit on the desired cell.
 //     This is the response to a FIRE.
 //     No other data is returned.
-// 5 = fin
+// 4 = fin
 //     The game is over.
 //     This is the response to any request.
 //     No other data is returned.
-// 6 = error
+// 5 = error
 //     The request could be not completed for a certain reason.
 //     This is the response to any request.
 //     A char[] string is requrned.
 enum bs_resp_opcode {
-    OK = 0, ABOUT = 1, WAIT = 2,
-    HIT = 3, MISS = 4,
-    FIN = 5, ERROR = 6
+    OK = 0, ABOUT = 1, WAIT = 2, NOK = 3, FIN = 4, ERROR = 5
 };
 struct bs_resp {
     enum bs_resp_opcode opcode;
