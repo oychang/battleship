@@ -277,9 +277,7 @@ int main(void)
             }
         }
 
-        // congratulations on making it this far, request
-        // this means that we're actually playing the game now
-        // Get request
+        // Congratulations on making it this far, request!
         switch (parse_request(request, &rq)) {
         // case CONNECT:
         //     handle_connect(&rp, &session);
@@ -301,9 +299,8 @@ int main(void)
             break;
         }
 
-        /*buffer response;
-        size_t len = pack_response(response, &rp);
-        send(clientfd, response, len, 0);*/
+        resp_len = pack_response(response, &rp);
+        send(sock, response, resp_len, 0);
     }
 
     close(serverfd);
