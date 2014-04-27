@@ -26,7 +26,7 @@ pack_request(char * buf, struct bs_req * request)
         buf[size++] = request->data.coord[0];
         buf[size++] = request->data.coord[1];
         break;
-    case CONNECT: case INFO: default:
+    case READY: case CONNECT: case INFO: default:
         break;
     }
 
@@ -59,7 +59,7 @@ pack_response(char * buf, struct bs_resp * response)
         strncpy(&buf[size], response->data.message, MAXSTRING);
         size += strlen(response->data.message) + 1;
         break;
-    case FIN: case OK: case WAIT: default:
+    case HIT: case MISS: case FIN: case OK: case WAIT: default:
         break;
     }
 
@@ -85,7 +85,7 @@ parse_request(char * buf, struct bs_req * req)
         req->data.coord[1] = buf[2];
         break;
     // noops -- these contain no additional data
-    case CONNECT: case INFO: default:
+    case READY: case CONNECT: case INFO: default:
         break;
     }
 
@@ -107,7 +107,7 @@ parse_response(char * buf, struct bs_resp * resp)
         strncpy(resp->data.message, &buf[1], MAXSTRING);
         break;
     // noops -- these contain no additional data
-    case FIN: case OK: case WAIT: default:
+    case HIT: case MISS: case FIN: case OK: case WAIT: default:
         break;
     }
 
