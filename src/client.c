@@ -18,6 +18,7 @@ int main(int argc, char *argv[]) {
 
     int sockfd;
     struct bs_req request;
+    struct bs_resp response;
     char req_buf[MAXDATASIZE];
     char resp_buf[MAXDATASIZE];
     size_t req_len;
@@ -62,6 +63,7 @@ int main(int argc, char *argv[]) {
     request.opcode = CONNECT;
     req_len = pack_request(req_buf, &request);
     send(sockfd, req_buf, req_len, 0);
+    printf("Sending connect request to server.\n");
 
     // Listen for a response
     if ((resp_len = recv(sockfd, resp_buf, MAXDATASIZE - 1, 0)) == -1) {
@@ -69,6 +71,17 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
     resp_buf[resp_len] = '\0';
+
+    switch (parse_response(resp_buf, &response)) {
+        case OK:
+	    printf("Alert: Successfully connected to server!\n");
+            break;
+        case ERROR:
+            printf("Error: %s\n", &resp_buf[1]);
+            break;
+        default:
+	    break;
+    }
 
     // Request information about the game from the server
     request.opcode = INFO;
