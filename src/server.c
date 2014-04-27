@@ -230,12 +230,15 @@ int main(void)
     };
     int sockets[2] = {-1, -1};
     buffer request;
+    buffer response;
     struct bs_req rq;
     struct bs_resp rp;
     size_t resp_len;
 
     while (session.stage != DONE) {
         int sock = select_wrapper(&master, &nfds, serverfd, &session, request);
+        // 0 = first player, 1 = second player, -1 = neither
+        int player = (sock == sockets[0] ? 0 : sock == sockets[1] ? 1 : -1);
 
         // if no useful data
         if (sock == -1) {
@@ -255,24 +258,27 @@ int main(void)
             send(sock, response, resp_len, 0);
             continue;
         // if good initial connection
-        } else if (session.stage == NOT_ENOUGH_PLAYERS) {
+        } else if (session.stage == NOT_ENOUGH_PLAYERS && player == -1) {
             sockets[session.players++] = sock;
             if (session.players == 2) {
                 session.stage = PLACING_SHIPS;
                 session.current_player = 0;
             }
+            continue;
+        } else if (player != -1) {
+            // if first player has connected but not second
+            // or if not this player's turn yet past NOT_ENOUGH_PLAYERS
+            if ((session.stage == NOT_ENOUGH_PLAYERS)
+                || (session.current_player != player)) {
+                rp.opcode = WAIT;
+                resp_len = pack_response(response, &rp);
+                send(sock, response, resp_len, 0);
+                continue;
+            }
         }
 
-        int player_number = (sock == sockets[0] ? 0 : 1);
-        if (session.players < 2) {
-            // TODO: the initial wait case
-            continue;
-        } else if (session.stage == PLAYING
-                   && session.current_player != player_number) {
-            // TODO: the subsequent wait case
-            continue;
-        }
-
+        // congratulations on making it this far, request
+        // this means that we're actually playing the game now
         // Get request
         switch (parse_request(request, &rq)) {
         // case CONNECT:
