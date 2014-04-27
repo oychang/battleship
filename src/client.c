@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
 	    printf("Alert: Successfully connected to server!\n");
             break;
         case ERROR:
-            printf("Error: %s\n", &resp_buf[1]);
+            printf("Error: %s\n", response.data.message);
             break;
         default:
 	    break;
@@ -87,6 +87,27 @@ int main(int argc, char *argv[]) {
     request.opcode = INFO;
     req_len = pack_request(req_buf, &request);
     send(sockfd, req_buf, req_len, 0);
+
+    parse_response(resp_buf, &response);
+    printf("\nBATTLESHIP Game Information\n");
+    printf("---------------------------\n");
+    printf("Current game state: ");
+    switch (response.data.session.stage) {
+        case NOT_ENOUGH_PLAYERS:
+	    printf("Not enough players. Waiting for players to join...\n");
+            break;
+        case PLACING_SHIPS:
+	    printf("Both players are placing their ships.\n");
+            break;
+        case PLAYING:
+            printf("Game is underway. Players are battling it out!\n");
+	     break;
+        case DONE:
+            printf("Game has concluded.");
+            break;       
+    }
+    printf("Player 1: %s\n", response.data.session.names[0]);
+    printf("Player 2: %s\n", response.data.session.names[1]);    
 
     close(sockfd);
     return EXIT_SUCCESS;
