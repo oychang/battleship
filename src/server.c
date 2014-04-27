@@ -232,6 +232,7 @@ int main(void)
     buffer request;
     struct bs_req rq;
     struct bs_resp rp;
+    size_t resp_len;
 
     while (session.stage != DONE) {
         int sock = select_wrapper(&master, &nfds, serverfd, &session, request);
@@ -243,11 +244,15 @@ int main(void)
         // if disconnect
         } else if (sock == -2) {
             // TODO: prepare fins, send to all remaining socks
+            printf("got client disconnect\n");
             session.stage = DONE;
             continue;
         // if too many connections
         } else if (!(sock == sockets[0] || sock == sockets[1])) {
-            // TODO: prepare error, send to sock
+            rp.opcode = ERROR;
+            rp.data.message = "Too many players";
+            resp_len = pack_response(response, &rp);
+            send(sock, response, resp_len, 0);
             continue;
         // if good initial connection
         } else if (session.stage == NOT_ENOUGH_PLAYERS) {
