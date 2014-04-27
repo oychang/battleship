@@ -253,7 +253,7 @@ int main(void)
         // if too many connections
         } else if (!(sock == sockets[0] || sock == sockets[1])) {
             rp.opcode = ERROR;
-            rp.data.message = "Too many players";
+            strncpy(rp.data.message, "Too many players", MAXSTRING);
             resp_len = pack_response(response, &rp);
             send(sock, response, resp_len, 0);
             continue;
