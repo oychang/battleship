@@ -14,81 +14,67 @@
 
 #define MAXDATASIZE 100 // max number of bytes we can get at once
 
-int main(int argc, char *argv[])
-{
-    // get hostname, port from user
+int main(int argc, char *argv[]) {
 
+    int sockfd;
+    struct bs_req request;
+    char req_buf[MAXDATASIZE];
+    char resp_buf[MAXDATASIZE];
+    size_t req_len;
+    int addr, resp_len;
+    struct addrinfo host_addr, *host_info, *option;
 
-    // try to connect by sending a connect request (use protocol.c)
-
-    // listen for response
-
-    // send an about
-
-    // end
-
-//=============================================================================
-    int sockfd;//, numbytes;
-    char buf[MAXDATASIZE];
-    struct addrinfo hints, *servinfo, *p;
-    int rv;
-
+    // Get hostname from user; should be second argument in argv
     if (argc != 2) {
-        fprintf(stderr,"usage: client hostname\n");
-        exit(1);
+        fprintf(stderr, "usage: client hostname\n");
+        exit(EXIT_FAILURE);
     }
 
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
+    memset(&host_addr, 0, sizeof(struct addrinfo));
+    host_addr.ai_family = AF_UNSPEC;
+    host_addr.ai_socktype = SOCK_STREAM;
 
-    if ((rv = getaddrinfo(argv[1], PORT, &hints, &servinfo)) != 0) {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-        return 1;
+    if ((addr = getaddrinfo(argv[1], PORT, &host_addr, &host_info)) != 0) {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(addr));
+        return EXIT_FAILURE;
     }
 
-    // loop through all the results and connect to the first we can
-    for(p = servinfo; p != NULL; p = p->ai_next) {
-        if ((sockfd = socket(p->ai_family, p->ai_socktype,
-                p->ai_protocol)) == -1) {
-            perror("client: socket");
+    for(option = host_info; option != NULL; option = option->ai_next) {
+        if ((sockfd = socket(option->ai_family, option->ai_socktype, 
+			     option->ai_protocol)) == -1) {
+	    perror("client: socket");
             continue;
         }
-
-        // Connect
-        if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-            close(sockfd);
+        if (connect(sockfd, option->ai_addr, option->ai_addrlen) == -1) {
+	    close(sockfd);
             perror("client: connect");
             continue;
-        }
-
+	}
         break;
     }
-
-    if (p == NULL) {
+    if (option == NULL) {
         fprintf(stderr, "client: failed to connect\n");
-        return 2;
+        return EXIT_FAILURE;
     }
+    freeaddrinfo(host_info);
+    
+    // Try to connect by sending a connect request (use protocol.c)
+    request.opcode = CONNECT;
+    req_len = pack_request(req_buf, &request);
+    send(sockfd, req_buf, req_len, 0);
 
-    freeaddrinfo(servinfo); // all done with this structure
-
-    // Send
-    struct bs_req req = {
-        .opcode = CONNECT
-    };
-    size_t len = pack_request(buf, &req);
-    send(sockfd, buf, len, 0);
-    return 0; // remove
-
-    int numbytes;
-    if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
+    // Listen for a response
+    if ((resp_len = recv(sockfd, resp_buf, MAXDATASIZE - 1, 0)) == -1) {
         perror("recv");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
-    buf[numbytes] = '\0';
+    resp_buf[resp_len] = '\0';
 
-    // Close
+    // Request information about the game from the server
+    request.opcode = INFO;
+    req_len = pack_request(req_buf, &request);
+    send(sockfd, req_buf, req_len, 0);
+
     close(sockfd);
-
-    return 0;
+    return EXIT_SUCCESS;
 }
