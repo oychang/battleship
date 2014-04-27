@@ -66,11 +66,10 @@ int main(int argc, char *argv[]) {
     printf("Sending connect request to server.\n");
 
     // Listen for a response
-    if ((resp_len = recv(sockfd, resp_buf, MAXDATASIZE - 1, 0)) == -1) {
+    if ((resp_len = recv(sockfd, resp_buf, MAXDATASIZE, 0)) == -1) {
         perror("recv");
         exit(EXIT_FAILURE);
     }
-    resp_buf[resp_len] = '\0';
 
     switch (parse_response(resp_buf, &response)) {
         case OK:
