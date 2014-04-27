@@ -5,6 +5,7 @@
 #define COLUMNS         10
 #define ROWS            10
 
+// The number of cells in our ship
 #define NUMBER_SHIPS    5
 // Number of cells each ship occupies
 #define DESTROYER_SIZE  2
@@ -25,6 +26,25 @@ enum orientation {HORIZONTAL = 0, VERTICAL = 1};
 //=============================================================================
 typedef enum cell board_t[COLUMNS][ROWS];
 //=============================================================================
+// Prints out the `enum cell` value of the board cells to stdout.
 void print_board(board_t board);
+
+// Returns the number of cells that ship `type` will occupy.
+int get_ship_size(const enum cell type);
+
+// Returns 0 if ship will not fit (i.e., it collides with a non-empty cell),
+// 1 if it will. Assume all obstacles are ships.
+int
+valid_position(board_t board, const enum orientation dir,
+    const unsigned char coords[2], const enum cell ship_type);
+
+// Attempts to add a ship to the board board.
+// It is assumed that coords are two (in bound) coordinates of board, of the
+// top-left of the ship, assuming (0, 0) is at the top-left corner of board.
+//
+// Returns 0 if ship will not fit, 1 if will and added.
+int
+add_ship(board_t board, const enum orientation dir,
+    const unsigned char coords[2], const enum cell ship_type);
 //=============================================================================
 #endif
