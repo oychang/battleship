@@ -12,7 +12,6 @@
 #include "protocol.h"
 #include "game.h"
 
-#define PORT "5000"
 #define MAXDATASIZE 100 // max number of bytes we can get at once
 
 int main(int argc, char *argv[])

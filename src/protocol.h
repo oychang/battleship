@@ -3,6 +3,8 @@
 
 #include "game.h" // board_t, enum orientation
 //=============================================================================
+#define PORT "5000"
+//=============================================================================
 #define MAXSTRING 64
 #define MAX_USERNAME_CHARS 8
 typedef char string[MAXSTRING];
