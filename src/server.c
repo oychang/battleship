@@ -251,7 +251,7 @@ int main(void)
             session.stage = DONE;
             continue;
         // if too many connections
-        } else if (!(sock == sockets[0] || sock == sockets[1])) {
+        } else if (player == -1 && session.players >= 2) {
             rp.opcode = ERROR;
             strncpy(rp.data.message, "Too many players", MAXSTRING);
             resp_len = pack_response(response, &rp);
