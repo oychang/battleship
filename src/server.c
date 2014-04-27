@@ -84,9 +84,8 @@ void
 handle_error(struct bs_resp * resp, string message)
 {
     resp->opcode = ERROR;
-
-    message[MAXSTRING-1] = '\0';
     strncpy(resp->data.message, message, MAXSTRING);
+    resp->data.message[MAXSTRING-1] = '\0';
     return;
 }
 //=============================================================================
