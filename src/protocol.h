@@ -1,7 +1,7 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
-#include "game.h" // board_t
+#include "game.h" // board_t, enum orientation
 //=============================================================================
 #define MAXSTRING 64
 #define MAX_USERNAME_CHARS 8

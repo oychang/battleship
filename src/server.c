@@ -221,7 +221,7 @@ int main(void)
 
     // Setup initial game data
     struct bs_session session = {
-        .stage = PLACING_SHIPS,
+        .stage = NOT_ENOUGH_PLAYERS,
         .names = {"Player 1", "Player 2"},
         .players = 0,
 

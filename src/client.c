@@ -9,7 +9,6 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-
 #include "protocol.h"
 #include "game.h"
 
@@ -18,6 +17,18 @@
 
 int main(int argc, char *argv[])
 {
+    // get hostname, port from user
+
+
+    // try to connect by sending a connect request (use protocol.c)
+
+    // listen for response
+
+    // send an about
+
+    // end
+
+//=============================================================================
     int sockfd;//, numbytes;
     char buf[MAXDATASIZE];
     struct addrinfo hints, *servinfo, *p;
@@ -68,6 +79,7 @@ int main(int argc, char *argv[])
     };
     size_t len = pack_request(buf, &req);
     send(sockfd, buf, len, 0);
+    return 0; // remove
 
     int numbytes;
     if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1) {
