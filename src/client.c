@@ -21,6 +21,7 @@ int main(int argc, char *argv[]) {
     struct bs_resp response;
     char req_buf[MAXDATASIZE];
     char resp_buf[MAXDATASIZE];
+    char player_name[MAX_USERNAME_CHARS];
     size_t req_len;
     int addr, resp_len;
     struct addrinfo host_addr, *host_info, *option;
@@ -30,7 +31,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "usage: client hostname\n");
         exit(EXIT_FAILURE);
     }
-
+    
     memset(&host_addr, 0, sizeof(struct addrinfo));
     host_addr.ai_family = AF_UNSPEC;
     host_addr.ai_socktype = SOCK_STREAM;
@@ -64,7 +65,7 @@ int main(int argc, char *argv[]) {
     req_len = pack_request(req_buf, &request);
     send(sockfd, req_buf, req_len, 0);
     printf("Sending connect request to server.\n");
-
+    
     // Listen for a response
     if ((resp_len = recv(sockfd, resp_buf, MAXDATASIZE - 1, 0)) == -1) {
         perror("recv");
@@ -80,34 +81,64 @@ int main(int argc, char *argv[]) {
             printf("Error: %s\n", response.data.message);
             break;
         default:
+	    printf("What opcode is this?!?\n");
 	    break;
     }
+
+    // Send request to establish player name (use protocol.c)
+    printf("Please provide your name (max 7 chars): ");
+    fgets(player_name, MAX_USERNAME_CHARS - 1, stdin);
+    request.opcode = NAME;
+    strcpy(request.data.name, player_name);
+    req_len = pack_request(req_buf, &request);
+    send(sockfd, req_buf, req_len, 0);
+    printf("Sending player naming request to server.\n");
+
+    // Listen for a response
+    if ((resp_len = recv(sockfd, resp_buf, MAXDATASIZE - 1, 0)) == -1) {
+        perror("recv");
+        exit(EXIT_FAILURE);
+    }
+    resp_buf[resp_len] = '\0';
 
     // Request information about the game from the server
     request.opcode = INFO;
     req_len = pack_request(req_buf, &request);
     send(sockfd, req_buf, req_len, 0);
 
-    parse_response(resp_buf, &response);
-    printf("\nBATTLESHIP Game Information\n");
-    printf("---------------------------\n");
-    printf("Current game state: ");
-    switch (response.data.session.stage) {
-        case NOT_ENOUGH_PLAYERS:
-	    printf("Not enough players. Waiting for players to join...\n");
-            break;
-        case PLACING_SHIPS:
-	    printf("Both players are placing their ships.\n");
-            break;
-        case PLAYING:
-            printf("Game is underway. Players are battling it out!\n");
-	     break;
-        case DONE:
-            printf("Game has concluded.");
-            break;       
+    // Listen for a response
+    if ((resp_len = recv(sockfd, resp_buf, MAXDATASIZE - 1, 0)) == -1) {
+        perror("recv");
+        exit(EXIT_FAILURE);
     }
-    printf("Player 1: %s\n", response.data.session.names[0]);
-    printf("Player 2: %s\n", response.data.session.names[1]);    
+    resp_buf[resp_len] = '\0';
+
+    if (parse_response(resp_buf, &response) == ABOUT) {
+        printf("\nBATTLESHIP Game Information\n");
+        printf("---------------------------\n");
+        printf("Current game state: ");
+        switch (response.data.session.stage) {
+            case NOT_ENOUGH_PLAYERS:
+	        printf("Not enough players. Waiting for players to join...\n");
+                break;
+            case PLACING_SHIPS:
+                printf("Both players are placing their ships.\n");
+                break;
+            case PLAYING:
+                printf("Game is underway. Players are battling it out!\n");
+                break;
+            case DONE:
+                printf("Game has concluded.");
+                break;
+            default:
+                printf("What status is this?!?\n");
+                break;
+        }
+        printf("Player 1: %s\n", response.data.session.names[0]);
+        printf("Player 2: %s\n", response.data.session.names[1]);    
+    } else {
+	printf("What opcode is this?!?\n");
+    }
 
     close(sockfd);
     return EXIT_SUCCESS;
