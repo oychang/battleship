@@ -117,7 +117,7 @@ enum bs_resp_opcode {
 struct bs_resp {
     enum bs_resp_opcode opcode;
     union {
-        string message;
+        char * message;
         struct bs_session session;
     } data;
 };
