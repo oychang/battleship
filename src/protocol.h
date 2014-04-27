@@ -110,8 +110,7 @@ struct bs_req {
 // 5 = error
 //     The request could be not completed for a certain reason.
 //     This is the response to any request.
-//     A char * string is required,
-//     max length MAXSTRING (if over, truncated). Always \0 terminated.
+//     A char[] string is requrned.
 enum bs_resp_opcode {
     OK = 0, ABOUT = 1, WAIT = 2, NOK = 3, FIN = 4, ERROR = 5
 };
