@@ -126,14 +126,6 @@ handle_fire(struct bs_resp * resp, struct bs_req * rq, struct bs_session * s)
     return;
 }*/
 //=============================================================================
-/*void
-handle_connect(struct bs_resp * resp, struct bs_session * s)
-{
-    s->players++;
-    resp->opcode = OK;
-    return;
-}*/
-//=============================================================================
 /* Wraps around the setup nastiness that select() requires.
  * Returns...
  * -1 if network error,
@@ -251,24 +243,28 @@ int main(void)
             continue;
         // if too many connections
         } else if (player == -1 && session.players >= 2) {
+            printf("too many\n");
             rp.opcode = ERROR;
             strncpy(rp.data.message, "Too many players", MAXSTRING);
             resp_len = pack_response(response, &rp);
             send(sock, response, resp_len, 0);
             continue;
         // if good initial connection
-        } else if (session.stage == NOT_ENOUGH_PLAYERS && player == -1) {
+        } else if (player == -1 && session.stage == NOT_ENOUGH_PLAYERS) {
+            printf("unfound\n");
             sockets[session.players++] = sock;
             if (session.players == 2) {
                 session.stage = PLACING_SHIPS;
                 session.current_player = 0;
+                // TODO: continue in this case?
             }
-            continue;
+            select_wrapper(&master, &nfds, serverfd, &session, request);
         } else if (player != -1) {
             // if first player has connected but not second
             // or if not this player's turn yet past NOT_ENOUGH_PLAYERS
             if ((session.stage == NOT_ENOUGH_PLAYERS)
                 || (session.current_player != player)) {
+                printf("wait\n");
                 rp.opcode = WAIT;
                 resp_len = pack_response(response, &rp);
                 send(sock, response, resp_len, 0);
@@ -277,10 +273,13 @@ int main(void)
         }
 
         // Congratulations on making it this far, request!
+        // We are now guaranteed that this player is allowed to connect,
+        // and if we're far enough in the game, that it is this player's turn.
         switch (parse_request(request, &rq)) {
-        // case CONNECT:
-        //     handle_connect(&rp, &session);
-        // case INFO:
+        case CONNECT:
+            rp.opcode = OK;
+            break;
+        case INFO:
         //     handle_info(&rp, &session);
         //     break;
         // case NAME:
