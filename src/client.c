@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
     int addr, resp_len;
     int ships_to_place = NUMBER_SHIPS;
     board_t client_board = {};
-    char ship_placement;
+    int ship_placement;
     
     struct addrinfo host_addr, *host_info, *option;
 
@@ -185,39 +185,59 @@ int main(int argc, char *argv[]) {
             case 1:
 	        printf("Ship to place: DESTROYER   size = %d\n", 
                        get_ship_size(DESTROYER));
+                request.data.ship.type = DESTROYER;
                 break;
             case 2:
 	        printf("Ship to place: SUBMARINE   size = %d\n", 
 	               get_ship_size(SUBMARINE));
+                request.data.ship.type = SUBMARINE;
                 break;
             case 3:
                 printf("Ship to place: CRUISER     size = %d\n",
                        get_ship_size(CRUISER));
+                request.data.ship.type = CRUISER;
 	        break;
             case 4:
                 printf("Ship to place: BATTLESHIP  size = %d\n",
                        get_ship_size(BATTLESHIP));
+                request.data.ship.type = BATTLESHIP;
                 break;
             case 5:
 	        printf("Ship to place: CARRIER     size = %d\n",
 	               get_ship_size(CARRIER));
+                request.data.ship.type = CARRIER;
 	        break;
         }
         printf("Enter ship orientation (0 for horizontal, 1 for vertical): ");
-        ship_placement = fgetc(stdin);
-        fflush(stdin);
-        printf("Entered ship orientation: %c\n", ship_placement);
+        scanf("%1d", &ship_placement);
+        request.data.ship.orientation = ship_placement;
         printf("Enter the x coordinate: ");
-        ship_placement = fgetc(stdin);
-        fflush(stdin);
-        printf("Entered x coordinate: %c\n", ship_placement);
+        scanf("%1d", &ship_placement);
+        request.data.ship.coord[0] = ship_placement;
         printf("Enter the y coordinate: ");
-        ship_placement = fgetc(stdin);
-        fflush(stdin);
-        printf("Entered y coordinate: %c\n", ship_placement);
-        ships_to_place--;
-        // need to set up the request structure for each ship being placed
-        req_len = pack_request(req_buf, &request);    
+        scanf("%1d", &ship_placement);
+        request.data.ship.coord[1] = ship_placement;
+
+        req_len = pack_request(req_buf, &request);
+        send(sockfd, req_buf, req_len, 0);
+        if ((resp_len = recv(sockfd, resp_buf, MAXDATASIZE - 1, 0)) == -1) {
+            perror("recv");
+            exit(EXIT_FAILURE);
+        }
+        resp_buf[resp_len] = '\0';
+        switch (parse_response(resp_buf, &response)) {
+            case OK:
+                printf("ALERT: Successfully placed the ship!\n\n");
+                ships_to_place--;
+                break;
+            case NOK:
+                printf("ALERT: Ship doesn't fit at given coordinates!\n\n");
+	        break;
+            default:
+                printf("What status is this?!?\n\n");
+                break;
+        }
+        print_board(client_board);
     }
 
     close(sockfd);
