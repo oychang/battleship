@@ -24,6 +24,8 @@ int main(int argc, char *argv[]) {
     char player_name[MAX_USERNAME_CHARS];
     size_t req_len;
     int addr, resp_len;
+    int ships_to_place = NUMBER_SHIPS;
+    board_t client_board = {};
     struct addrinfo host_addr, *host_info, *option;
 
     // Get hostname from user; should be second argument in argv
@@ -158,12 +160,9 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
     resp_buf[resp_len] = '\0';
-    printf("What the opcode is doe: %d\n", resp_buf[0]);
-    parse_response(resp_buf, &response);
-    printf("The error: %s\n", response.data.message);
     while (parse_response(resp_buf, &response) == WAIT) {
         printf("Server is not yet ready; trying again in 5 seconds\n");
-        sleep(5000);
+        sleep(5);
         send(sockfd, req_buf, req_len, 0);
         // Listen for a response; if WAIT, then go through loop again
         if ((resp_len = recv(sockfd, resp_buf, MAXDATASIZE - 1, 0)) == -1) {
@@ -176,7 +175,36 @@ int main(int argc, char *argv[]) {
     // If we got here, that means two clients have connected to server
     // The client is now able to place ships
 
-    
+    printf("ALERT: The time has come to place your ships, admiral!\n");
+    print_board(client_board);
+    request.opcode = PLACE;
+    while (ships_to_place > 0) {
+        switch (ships_to_place) {
+            case 1:
+	        printf("Ship to place: DESTROYER, size = %d\n", 
+                       get_ship_size(DESTROYER));
+                break;
+            case 2:
+	        printf("Ship to place: SUBMARINE, size = %d\n", 
+	               get_ship_size(SUBMARINE));
+                       break;
+            case 3:
+                printf("Ship to place: CRUISER, size = %d\n",
+                       get_ship_size(CRUISER));
+	               break;
+            case 4:
+                printf("Ship to place: BATTLESHIP, size = %d\n",
+                       get_ship_size(BATTLESHIP));
+                       break;
+            case 5:
+	        printf("Ship to place: CARRIER, size = %d\n",
+	               get_ship_size(CARRIER));
+	               break;
+        }
+        ships_to_place--;
+        // need to set up the request structure for each ship being placed
+        req_len = pack_request(req_buf, &request);    
+    }
 
     close(sockfd);
     return EXIT_SUCCESS;
