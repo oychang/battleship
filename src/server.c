@@ -256,6 +256,7 @@ int main(void)
                 rp.opcode = OK;
             }
             break;
+        // TODO: implement ready?
         default:
             handle_error(&rp, "Invalid Opcode");
             break;
