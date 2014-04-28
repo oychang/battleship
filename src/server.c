@@ -229,8 +229,8 @@ int main(void)
         } else if (player != -1) {
             // if first player has connected but not second
             // or if not this player's turn yet past NOT_ENOUGH_PLAYERS
-            if ((session.stage == NOT_ENOUGH_PLAYERS)
-                || (session.current_player != player)) {
+            if ((session.stage == NOT_ENOUGH_PLAYERS && sockets[0] == -1) ||
+                (session.stage != NOT_ENOUGH_PLAYERS && session.current_player != player)) {
                 printf("wait\n");
                 rp.opcode = WAIT;
                 resp_len = pack_response(response, &rp);
