@@ -5,11 +5,23 @@ void
 print_board(board_t board)
 {
     int i, j;
+    printf("\n");
     for (i = 0; i < ROWS; i++) {
         for (j = 0; j < COLUMNS; j++)
-            printf("%d ", board[i][j]);
-        printf("\n");
+            if (j == 0) {
+	        printf(" %d | ", board[i][j]);
+	    } else if (j == COLUMNS - 1) {
+                printf("%d ", board[i][j]);
+	    } else {
+	        printf("%d | ", board[i][j]);
+	    }
+        if (i == ROWS - 1) {
+	    printf("\n");
+	} else {
+            printf("\n--- --- --- --- --- --- --- --- --- ---\n");
+	}
     }
+    printf("\n");
 }
 //=============================================================================
 int

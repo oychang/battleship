@@ -26,6 +26,8 @@ int main(int argc, char *argv[]) {
     int addr, resp_len;
     int ships_to_place = NUMBER_SHIPS;
     board_t client_board = {};
+    char ship_placement;
+    
     struct addrinfo host_addr, *host_info, *option;
 
     // Get hostname from user; should be second argument in argv
@@ -181,26 +183,38 @@ int main(int argc, char *argv[]) {
     while (ships_to_place > 0) {
         switch (ships_to_place) {
             case 1:
-	        printf("Ship to place: DESTROYER, size = %d\n", 
+	        printf("Ship to place: DESTROYER   size = %d\n", 
                        get_ship_size(DESTROYER));
                 break;
             case 2:
-	        printf("Ship to place: SUBMARINE, size = %d\n", 
+	        printf("Ship to place: SUBMARINE   size = %d\n", 
 	               get_ship_size(SUBMARINE));
-                       break;
+                break;
             case 3:
-                printf("Ship to place: CRUISER, size = %d\n",
+                printf("Ship to place: CRUISER     size = %d\n",
                        get_ship_size(CRUISER));
-	               break;
+	        break;
             case 4:
-                printf("Ship to place: BATTLESHIP, size = %d\n",
+                printf("Ship to place: BATTLESHIP  size = %d\n",
                        get_ship_size(BATTLESHIP));
-                       break;
+                break;
             case 5:
-	        printf("Ship to place: CARRIER, size = %d\n",
+	        printf("Ship to place: CARRIER     size = %d\n",
 	               get_ship_size(CARRIER));
-	               break;
+	        break;
         }
+        printf("Enter ship orientation (0 for horizontal, 1 for vertical): ");
+        ship_placement = fgetc(stdin);
+        fflush(stdin);
+        printf("Entered ship orientation: %c\n", ship_placement);
+        printf("Enter the x coordinate: ");
+        ship_placement = fgetc(stdin);
+        fflush(stdin);
+        printf("Entered x coordinate: %c\n", ship_placement);
+        printf("Enter the y coordinate: ");
+        ship_placement = fgetc(stdin);
+        fflush(stdin);
+        printf("Entered y coordinate: %c\n", ship_placement);
         ships_to_place--;
         // need to set up the request structure for each ship being placed
         req_len = pack_request(req_buf, &request);    
