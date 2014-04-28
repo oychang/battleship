@@ -98,9 +98,10 @@ parse_response(char * buf, struct bs_resp * resp)
     resp->opcode = buf[0];
     switch (buf[0]) {
     case ABOUT:
-        strncpy(resp->data.session.names[0], &buf[1], MAX_USERNAME_CHARS);
+        resp->data.session.stage = buf[1];
+        strncpy(resp->data.session.names[0], &buf[2], MAX_USERNAME_CHARS);
         strncpy(resp->data.session.names[1],
-            &buf[1 + strlen(resp->data.session.names[0]) + 1],
+            &buf[2 + strlen(resp->data.session.names[0]) + 1],
             MAX_USERNAME_CHARS);
         break;
     case ERROR:

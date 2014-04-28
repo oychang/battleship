@@ -87,9 +87,12 @@ int main(int argc, char *argv[]) {
     // Send request to establish player name (use protocol.c)
     printf("Please provide your name (max 7 chars): ");
     fgets(player_name, MAX_USERNAME_CHARS, stdin);
+    printf("Provided name was: %s\n", player_name);
     request.opcode = NAME;
     strcpy(request.data.name, player_name);
+    printf("Packaged name was: %s\n", request.data.name);
     req_len = pack_request(req_buf, &request);
+    printf("Pacakage length is: %d\n", req_len);
     send(sockfd, req_buf, req_len, 0);
     printf("Sending player naming request to server.\n");
 
@@ -111,6 +114,7 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
     resp_buf[resp_len] = '\0';
+    printf("Received response length: %d\n", resp_len);
 
     if (parse_response(resp_buf, &response) == ABOUT) {
         printf("\nBATTLESHIP Game Information\n");
