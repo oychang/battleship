@@ -24,7 +24,6 @@ setup_server()
 {
     struct addrinfo server;
     struct addrinfo * p = &server;
-
     struct addrinfo hints, *results;
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
@@ -53,9 +52,7 @@ setup_server()
         } else
             break;
     }
-
     freeaddrinfo(results);
-
     if (p == NULL) {
         fprintf(stderr, "failed to bind socket\n");
         return -1;
@@ -67,19 +64,6 @@ setup_server()
     return sockfd;
 }
 //=============================================================================
-/*void
-handle_info(struct bs_resp * resp, struct bs_session * s)
-{
-    resp->opcode = ABOUT;
-
-    resp->data.session.stage = s->stage;
-
-    strncpy(resp->data.session.names[0], s->names[0], MAX_USERNAME_CHARS);
-    strncpy(resp->data.session.names[1], s->names[1], MAX_USERNAME_CHARS);
-
-    return;
-}*/
-//=============================================================================
 void
 handle_error(struct bs_resp * resp, string message)
 {
@@ -88,20 +72,6 @@ handle_error(struct bs_resp * resp, string message)
     resp->data.message[MAXSTRING-1] = '\0';
     return;
 }
-//=============================================================================
-// TODO: implement
-/*void
-handle_name(struct bs_resp * resp, struct bs_req * rq, struct bs_session * s)
-{
-    if (s->players == 2) {
-        handle_error(resp, "Too many players");
-        return;
-    }
-
-    resp->opcode = OK;
-
-    return;
-}*/
 //=============================================================================
 // TODO: implement
 /*void
