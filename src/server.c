@@ -207,6 +207,7 @@ int main(void)
             // in essence, once anyone disconnects, the game is dead
             // TODO: prepare fins, send to all remaining socks
             printf("got client disconnect\n");
+            session.players--;
             session.stage = DONE;
             continue;
         // if too many connections
@@ -246,14 +247,19 @@ int main(void)
         case CONNECT:
             rp.opcode = OK;
             break;
-        // case INFO:
-        //     handle_info(&rp, &session);
-        //     break;
+        case INFO:
+            rp.opcode = ABOUT;
+            rp.data.session.stage = session.stage;
+            rp.data.session.players = session.players;
+            strncpy(rp.data.session.names[0], session.names[0], MAX_USERNAME_CHARS);
+            rp.data.session.names[0][MAX_USERNAME_CHARS-1] = '\0';
+            strncpy(rp.data.session.names[1], session.names[1], MAX_USERNAME_CHARS);
+            rp.data.session.names[1][MAX_USERNAME_CHARS-1] = '\0';
+            break;
         case NAME:
-            printf("name case\n");
+            rp.opcode = OK;
             strncpy(session.names[player], rq.data.name, MAX_USERNAME_CHARS);
             session.names[player][MAX_USERNAME_CHARS-1] = '\0';
-            rp.opcode = OK;
             break;
         // case PLACE:
         //     handle_place(&rp, &rq, &session);
