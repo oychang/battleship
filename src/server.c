@@ -142,21 +142,17 @@ select_wrapper(fd_set * master, int * nfds, int serverfd,
             if (clientfd > *nfds)
                 *nfds = clientfd;
 
-            printf("connect\n");
-
             return clientfd;
         // if data to read & not the server
         } else {
             int recvbytes = recv(fd, buf, sizeof(buf), 0);
 
             if (recvbytes <= 0) {
-                printf("close\n");
                 close(fd);
                 FD_CLR(fd, master);
                 return -2;
             }
 
-            printf("data from previously connected\n");
             return fd;
         }
     }
@@ -200,6 +196,7 @@ int main(void)
         int sock = select_wrapper(&master, &nfds, serverfd, &session, request);
         // 0 = first player, 1 = second player, -1 = neither
         int player = (sock == sockets[0] ? 0 : sock == sockets[1] ? 1 : -1);
+        printf("player = %d\n", player);
 
         // if no useful data
         if (sock == -1) {
@@ -207,6 +204,7 @@ int main(void)
             continue;
         // if disconnect
         } else if (sock == -2) {
+            // in essence, once anyone disconnects, the game is dead
             // TODO: prepare fins, send to all remaining socks
             printf("got client disconnect\n");
             session.stage = DONE;
@@ -221,7 +219,6 @@ int main(void)
             continue;
         // if good initial connection
         } else if (player == -1 && session.stage == NOT_ENOUGH_PLAYERS) {
-            printf("unfound\n");
             sockets[session.players++] = sock;
             if (session.players == 2) {
                 session.stage = PLACING_SHIPS;
