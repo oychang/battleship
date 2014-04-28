@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
         perror("recv");
         exit(EXIT_FAILURE);
     }
-    resp_buf[resp_len] = '\0';
+    printf("name responese opcode (0 = okay) = %d\n", resp_buf[0]);
 
     // Request information about the game from the server
     request.opcode = INFO;
