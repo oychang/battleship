@@ -100,8 +100,8 @@ struct bs_req {
 //     business in sequence.
 //     This is the response to any request.
 // 3 = nok (not ok)
-//     Player missed a hit on the desired cell.
-//     This is the response to a FIRE.
+//     Player missed a hit on the desired cell, or ship will not fit.
+//     This is the response to a FIRE or a bad PLACE.
 //     No other data is returned.
 // 4 = fin
 //     The game is over.

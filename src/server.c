@@ -73,29 +73,6 @@ handle_error(struct bs_resp * resp, string message)
     return;
 }
 //=============================================================================
-// TODO: implement
-/*void
-handle_place(struct bs_resp * resp, struct bs_req * rq, struct bs_session * s)
-{
-    return;
-}*/
-//=============================================================================
-// TODO: implement
-/*void
-handle_fire(struct bs_resp * resp, struct bs_req * rq, struct bs_session * s)
-{
-    // Get player, then work with opponent's board
-    // Check if already taken
-    // Check if a hit
-    // It's a miss
-
-    // Handle current player
-    // Still current player if already taken
-    // Multiple shots if a hit
-
-    return;
-}*/
-//=============================================================================
 /* Wraps around the setup nastiness that select() requires.
  * Returns...
  * -1 if network error,
@@ -263,7 +240,11 @@ int main(void)
             session.names[player][MAX_USERNAME_CHARS-1] = '\0';
             break;
         case PLACE:
-            // handle_place(&rp, &rq, &session);
+            if (add_ship(session.boards[player], rq.data.ship.orientation,
+                rq.data.ship.coord, rq.data.ship.type) == 0)
+                rp.opcode = OK;
+            else
+                rp.opcode = NOK;
             break;
         case FIRE:
             cell_value = session.boards[player][rq.data.coord[0]][rq.data.coord[1]];
