@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 
     // Send request to establish player name (use protocol.c)
     printf("Please provide your name (max 7 chars): ");
-    fgets(player_name, MAX_USERNAME_CHARS - 1, stdin);
+    fgets(player_name, MAX_USERNAME_CHARS, stdin);
     request.opcode = NAME;
     strcpy(request.data.name, player_name);
     req_len = pack_request(req_buf, &request);
