@@ -249,9 +249,14 @@ int main(void)
             else {
                 session.boards[player][rq.data.coord[0]][rq.data.coord[1]] = HIT;
                 rp.opcode = OK;
+                session.current_player = (session.current_player == 0 ? 1 : 0);
             }
             break;
-        // TODO: implement ready?
+        case READY:
+            if (session.current_player == player)
+                rp.opcode = OK;
+            else
+                rp.opcode = WAIT;
         default:
             handle_error(&rp, "Invalid Opcode");
             break;
