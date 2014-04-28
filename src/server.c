@@ -102,7 +102,6 @@ select_wrapper(fd_set * master, int * nfds, int serverfd,
         } else if (fd == serverfd) {
             if (s->stage != NOT_ENOUGH_PLAYERS)
                 return fd; // attempt to join game in progress
-
             // Accept the connection
             struct sockaddr_storage client;
             socklen_t addrlen = sizeof(client);
@@ -112,23 +111,18 @@ select_wrapper(fd_set * master, int * nfds, int serverfd,
                 perror("accept");
                 return -1;
             }
-
             // Add to our set of connections
             FD_SET(clientfd, master);
             if (clientfd > *nfds)
                 *nfds = clientfd;
-
             return clientfd;
         // if data to read & not the server
         } else {
-            int recvbytes = recv(fd, buf, sizeof(buf), 0);
-
-            if (recvbytes <= 0) {
+            if (recv(fd, buf, sizeof(buf), 0) <= 0) {
                 close(fd);
                 FD_CLR(fd, master);
                 return -2;
             }
-
             return fd;
         }
     }
@@ -203,6 +197,8 @@ int main(void)
                 session.current_player = 0;
                 // TODO: continue in this case?
             }
+            // Read again from presumably the same socket the initial CONNECT
+            // TODO: perhaps just put a recv() here to make sure same socket
             select_wrapper(&master, &nfds, serverfd, &session, request);
         } else if (player != -1) {
             // if first player has connected but not second
