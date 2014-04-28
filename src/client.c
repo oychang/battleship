@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "usage: client hostname\n");
         exit(EXIT_FAILURE);
     }
-    
+
     memset(&host_addr, 0, sizeof(struct addrinfo));
     host_addr.ai_family = AF_UNSPEC;
     host_addr.ai_socktype = SOCK_STREAM;
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     }
 
     for(option = host_info; option != NULL; option = option->ai_next) {
-        if ((sockfd = socket(option->ai_family, option->ai_socktype, 
+        if ((sockfd = socket(option->ai_family, option->ai_socktype,
 			     option->ai_protocol)) == -1) {
 	    perror("client: socket");
             continue;
@@ -59,13 +59,13 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
     freeaddrinfo(host_info);
-    
+
     // Try to connect by sending a connect request (use protocol.c)
     request.opcode = CONNECT;
     req_len = pack_request(req_buf, &request);
     send(sockfd, req_buf, req_len, 0);
     printf("Sending connect request to server.\n");
-    
+
     // Listen for a response
     if ((resp_len = recv(sockfd, resp_buf, MAXDATASIZE, 0)) == -1) {
         perror("recv");
@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
                 break;
         }
         printf("Player 1: %s\n", response.data.session.names[0]);
-        printf("Player 2: %s\n", response.data.session.names[1]);    
+        printf("Player 2: %s\n", response.data.session.names[1]);
     } else {
 	printf("What opcode is this?!?\n");
     }
