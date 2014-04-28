@@ -227,14 +227,14 @@ int main(int argc, char *argv[]) {
         resp_buf[resp_len] = '\0';
         switch (parse_response(resp_buf, &response)) {
             case OK:
-                printf("ALERT: Successfully placed the ship!\n\n");
+                printf("ALERT: Successfully placed the ship!\n");
                 ships_to_place--;
                 break;
             case NOK:
-                printf("ALERT: Ship doesn't fit at given coordinates!\n\n");
+                printf("ALERT: Ship doesn't fit at given coordinates!\n");
 	        break;
             default:
-                printf("What status is this?!?\n\n");
+                printf("What status is this?!?\n");
                 break;
         }
         print_board(client_board);

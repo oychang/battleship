@@ -68,7 +68,7 @@ add_ship(board_t board, const enum orientation dir,
     const unsigned char coords[2], const enum cell ship_type)
 {
     if (!valid_position(board, dir, coords, ship_type))
-        return 0;
+        return 1;
 
     const int size = get_ship_size(ship_type);
     int x = coords[0];
@@ -81,6 +81,6 @@ add_ship(board_t board, const enum orientation dir,
             board[x+i][y] = ship_type;
     }
 
-    return 1;
+    return 0;
 }
 //=============================================================================
