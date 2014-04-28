@@ -257,6 +257,7 @@ int main(void)
                 rp.opcode = OK;
             else
                 rp.opcode = WAIT;
+            break;
         default:
             handle_error(&rp, "Invalid Opcode");
             break;
