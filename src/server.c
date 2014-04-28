@@ -179,7 +179,7 @@ int main(void)
     // Setup initial game data
     struct bs_session session = {
         .stage = NOT_ENOUGH_PLAYERS,
-        .names = {"Player 1", "Player 2"},
+        .names = {"Player1", "Player2"},
         .players = 0,
 
         .current_player = -1,
