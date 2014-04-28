@@ -246,13 +246,15 @@ int main(void)
         case CONNECT:
             rp.opcode = OK;
             break;
-        case INFO:
+        // case INFO:
         //     handle_info(&rp, &session);
         //     break;
-        // case NAME:
-        //     // TODO: add socket to session
-        //     handle_name(&rp, &rq, &session);
-        //     break;
+        case NAME:
+            printf("name case\n");
+            strncpy(session.names[player], rq.data.name, MAX_USERNAME_CHARS);
+            session.names[player][MAX_USERNAME_CHARS-1] = '\0';
+            rp.opcode = OK;
+            break;
         // case PLACE:
         //     handle_place(&rp, &rq, &session);
         //     break;
