@@ -146,6 +146,38 @@ int main(int argc, char *argv[]) {
 	printf("What opcode is this?!?\n");
     }
 
+    printf("Beginning to poll server to see if ready!\n");
+    // Poll server to see if the stage is set for game to begin
+    request.opcode = READY;
+    req_len = pack_request(req_buf, &request);
+
+    send(sockfd, req_buf, req_len, 0);
+    // Listen for a response; if WAIT, then go through loop
+    if ((resp_len = recv(sockfd, resp_buf, MAXDATASIZE - 1, 0)) == -1) {
+        perror("recv");
+        exit(EXIT_FAILURE);
+    }
+    resp_buf[resp_len] = '\0';
+    printf("What the opcode is doe: %d\n", resp_buf[0]);
+    parse_response(resp_buf, &response);
+    printf("The error: %s\n", response.data.message);
+    while (parse_response(resp_buf, &response) == WAIT) {
+        printf("Server is not yet ready; trying again in 5 seconds\n");
+        sleep(5000);
+        send(sockfd, req_buf, req_len, 0);
+        // Listen for a response; if WAIT, then go through loop again
+        if ((resp_len = recv(sockfd, resp_buf, MAXDATASIZE - 1, 0)) == -1) {
+            perror("recv");
+            exit(EXIT_FAILURE);
+        }
+        resp_buf[resp_len] = '\0';
+    }
+
+    // If we got here, that means two clients have connected to server
+    // The client is now able to place ships
+
+    
+
     close(sockfd);
     return EXIT_SUCCESS;
 }
