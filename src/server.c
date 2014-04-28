@@ -191,6 +191,7 @@ int main(void)
     struct bs_req rq;
     struct bs_resp rp;
     size_t resp_len;
+    enum cell cell_value;
 
     while (session.stage != DONE) {
         int sock = select_wrapper(&master, &nfds, serverfd, &session, request);
@@ -261,12 +262,19 @@ int main(void)
             strncpy(session.names[player], rq.data.name, MAX_USERNAME_CHARS);
             session.names[player][MAX_USERNAME_CHARS-1] = '\0';
             break;
-        // case PLACE:
-        //     handle_place(&rp, &rq, &session);
-        //     break;
-        // case FIRE:
-        //     handle_fire(&rp, &rq, &session);
-        //     break;
+        case PLACE:
+            // handle_place(&rp, &rq, &session);
+            break;
+        case FIRE:
+            cell_value = session.boards[player][rq.data.coord[0]][rq.data.coord[1]];
+            // if firing on something with no ship
+            if (cell_value == EMPTY || cell_value == MISS || cell_value == HIT)
+                rp.opcode = NOK;
+            else {
+                session.boards[player][rq.data.coord[0]][rq.data.coord[1]] = HIT;
+                rp.opcode = OK;
+            }
+            break;
         default:
             handle_error(&rp, "Invalid Opcode");
             break;
