@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
     strcpy(request.data.name, player_name);
     printf("Packaged name was: %s\n", request.data.name);
     req_len = pack_request(req_buf, &request);
-    printf("Pacakage length is: %d\n", req_len);
+    printf("Pacakage length is: %zd\n", req_len);
     send(sockfd, req_buf, req_len, 0);
     printf("Sending player naming request to server.\n");
 

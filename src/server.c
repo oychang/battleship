@@ -84,7 +84,6 @@ select_wrapper(fd_set * master, int * nfds, int serverfd,
     struct bs_session * s, char * buf)
 {
     // Copy list
-    // TODO: check if this actually works
     fd_set readfds;
     FD_ZERO(&readfds);
     readfds = *master;
