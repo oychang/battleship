@@ -36,7 +36,7 @@ int get_ship_size(const enum cell type);
 // 1 if it will. Assume all obstacles are ships.
 int
 valid_position(board_t board, const enum orientation dir,
-    const unsigned char coords[2], const enum cell ship_type);
+    const int coords[2], const enum cell ship_type);
 
 // Attempts to add a ship to the board board.
 // It is assumed that coords are two (in bound) coordinates of board, of the
@@ -45,6 +45,6 @@ valid_position(board_t board, const enum orientation dir,
 // Returns 0 if ship will not fit, 1 if will and added.
 int
 add_ship(board_t board, const enum orientation dir,
-    const unsigned char coords[2], const enum cell ship_type);
+    const int coords[2], const enum cell ship_type);
 //=============================================================================
 #endif

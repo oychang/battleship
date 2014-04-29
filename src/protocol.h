@@ -73,12 +73,12 @@ enum bs_req_opcode {
 struct bs_req {
     enum bs_req_opcode opcode;
     union {
-        char          name[MAX_USERNAME_CHARS];
-        unsigned char coord[2];
+        char name[MAX_USERNAME_CHARS];
+        int  coord[2];
         struct {
             enum cell        type;
             enum orientation orientation;
-            unsigned char    coord[2];
+            int              coord[2];
         } ship;
     } data;
 };
