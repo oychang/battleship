@@ -11,11 +11,11 @@ print_board(board_t board)
     for (i = 0; i < ROWS; i++) {
         for (j = 0; j < COLUMNS; j++)
             if (j == 0) {
-	        printf(" %c +   %d | ", 65 + i, board[i][j]);
+	        printf(" %c +   %d | ", 65 + i, board[j][i]);
 	    } else if (j == COLUMNS - 1) {
-                printf("%d ", board[i][j]);
+                printf("%d ", board[j][i]);
 	    } else {
-	        printf("%d | ", board[i][j]);
+	        printf("%d | ", board[j][i]);
 	    }
         if (i == ROWS - 1) {
 	    printf("\n");
@@ -52,10 +52,10 @@ valid_position(board_t board, const enum orientation dir,
     int i;
     for (i = 0; i < size; i++) {
         if (dir == HORIZONTAL) {
-            if (board[x][y+i] != EMPTY)
+            if (board[x+i][y] != EMPTY)
                 return 0;
         } else {
-            if (board[x+i][y] != EMPTY)
+            if (board[x][y+i] != EMPTY)
                 return 0;
         }
     }
@@ -76,9 +76,9 @@ add_ship(board_t board, const enum orientation dir,
     int i;
     for (i = 0; i < size; i++) {
         if (dir == HORIZONTAL)
-            board[x][y+i] = ship_type;
-        else
             board[x+i][y] = ship_type;
+        else
+            board[x][y+i] = ship_type;
     }
 
     return 0;

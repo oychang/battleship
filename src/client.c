@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
     size_t req_len;
     int addr, resp_len;
     int ships_to_place = NUMBER_SHIPS;
-    board_t client_board = {};
+    board_t client_board = {{}, {}};
     int ship_placement;
     
     struct addrinfo host_addr, *host_info, *option;
@@ -217,7 +217,6 @@ int main(int argc, char *argv[]) {
         printf("Enter the y coordinate: ");
         scanf("%1d", &ship_placement);
         request.data.ship.coord[1] = ship_placement;
-
         req_len = pack_request(req_buf, &request);
         send(sockfd, req_buf, req_len, 0);
         if ((resp_len = recv(sockfd, resp_buf, MAXDATASIZE - 1, 0)) == -1) {
@@ -228,7 +227,10 @@ int main(int argc, char *argv[]) {
         switch (parse_response(resp_buf, &response)) {
             case OK:
                 printf("ALERT: Successfully placed the ship!\n");
-                ships_to_place--;
+                printf("Coordinates: %d, %d\n", request.data.ship.coord[0], request.data.ship.coord[1]);
+                add_ship(client_board, request.data.ship.orientation,
+			 request.data.ship.coord, request.data.ship.type);
+		ships_to_place--; 
                 break;
             case NOK:
                 printf("ALERT: Ship doesn't fit at given coordinates!\n");
