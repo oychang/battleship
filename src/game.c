@@ -9,20 +9,21 @@ print_board(board_t board)
     printf("  (X)  0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9\n");
     printf("(Y)    + + + + + + + + + + + + + + + + + + +\n\n");
     for (i = 0; i < ROWS; i++) {
-        for (j = 0; j < COLUMNS; j++)
-            if (j == 0) {
-	        printf(" %c +   %d | ", 65 + i, board[j][i]);
-	    } else if (j == COLUMNS - 1) {
+        for (j = 0; j < COLUMNS; j++) {
+            if (j == 0)
+                printf(" %c +   %d | ", 'A' + i, board[j][i]);
+            else if (j == COLUMNS - 1)
                 printf("%d ", board[j][i]);
-	    } else {
-	        printf("%d | ", board[j][i]);
-	    }
-        if (i == ROWS - 1) {
-	    printf("\n");
-	} else {
+            else
+                printf("%d | ", board[j][i]);
+        }
+
+        if (i == ROWS - 1)
+            printf("\n");
+        else
             printf("\n-- +  --- --- --- --- --- --- --- --- --- ---\n");
-	}
     }
+
     printf("\n");
 }
 //=============================================================================
