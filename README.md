@@ -1,7 +1,7 @@
 Battleship
 ==========
 
-Joseph Choi & Oliver Chang, Project 3
+Joseph Choi & Oliver Chang, Project 4
 
 CSC524: Computer Networks, University of Miami, Spring 2014
 
