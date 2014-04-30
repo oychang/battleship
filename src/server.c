@@ -233,6 +233,9 @@ int main(void)
             rp.opcode = OK;
             strncpy(session.names[player], rq.data.name, MAX_USERNAME_CHARS);
             session.names[player][MAX_USERNAME_CHARS-1] = '\0';
+            printf("received name: %d\n", request[4]);
+            printf("request 5 and 6: %d, %d\n", request[5], request[6]);
+            printf("The player's name is: %s\n", session.names[player]);
             break;
         case PLACE:
             if (add_ship(session.boards[player], rq.data.ship.orientation,

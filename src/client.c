@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
     char resp_buf[MAXDATASIZE];
     char player_name[MAX_USERNAME_CHARS];
     size_t req_len;
-    int addr, resp_len;
+    int addr, resp_len, index;
     int ships_to_place = NUMBER_SHIPS;
     board_t client_board = {{}, {}};
     int ship_placement;
@@ -91,12 +91,21 @@ int main(int argc, char *argv[]) {
     // Send request to establish player name (use protocol.c)
     printf("Please provide your name (max 7 chars): ");
     fgets(player_name, MAX_USERNAME_CHARS, stdin);
+    for (index = 0; index < MAX_USERNAME_CHARS; index++) {
+      if (player_name[index] == '\n') {
+        player_name[index] = '\0'; // replace newline with null char
+        break;
+      }
+    }
+    /*
     if (strlen(player_name) < MAX_USERNAME_CHARS - 1) {
         player_name[strlen(player_name) - 1] = '\0';
     }
+    */
     printf("Provided name was: %s\n", player_name);
     request.opcode = NAME;
     strcpy(request.data.name, player_name);
+    request.data.name[strlen(player_name)] = '\0';
     printf("Packaged name was: %s\n", request.data.name);
     req_len = pack_request(req_buf, &request);
     printf("Pacakage length is: %zd\n", req_len);
