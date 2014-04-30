@@ -165,7 +165,6 @@ int main(void)
 
     while (session.stage != DONE) {
         int sock = select_wrapper(&master, &nfds, serverfd, &session, request);
-        // This socket corresponds to which player?
         // 0 = first player, 1 = second player, -1 = neither
         int player = (sock == sockets[0] ? 0 : sock == sockets[1] ? 1 : -1);
         printf("player = %d\n", player);
@@ -193,8 +192,11 @@ int main(void)
         // if good initial connection
         } else if (player == -1 && session.stage == NOT_ENOUGH_PLAYERS) {
             sockets[session.players++] = sock;
-            if (session.players == 2)
+            if (session.players == 2) {
                 session.stage = PLACING_SHIPS;
+                session.current_player = 0;
+                // TODO: continue in this case?
+            }
             // Read again from presumably the same socket the initial CONNECT
             // TODO: perhaps just put a recv() here to make sure same socket
             select_wrapper(&master, &nfds, serverfd, &session, request);
@@ -231,6 +233,9 @@ int main(void)
             rp.opcode = OK;
             strncpy(session.names[player], rq.data.name, MAX_USERNAME_CHARS);
             session.names[player][MAX_USERNAME_CHARS-1] = '\0';
+            printf("received name: %d\n", request[4]);
+            printf("request 5 and 6: %d, %d\n", request[5], request[6]);
+            printf("The player's name is: %s\n", session.names[player]);
             break;
         case PLACE:
             if (add_ship(session.boards[player], rq.data.ship.orientation,
