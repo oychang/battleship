@@ -16,9 +16,8 @@ protocol.o: protocol.c protocol.h
 
 
 .PHONY: clean clean-submit
-# Remove all executables files in the Makefile directory
 clean:
 	rm -f *.o
-	find . -maxdepth 1 -type f -executable -delete
 clean-submit: clean
+	find . -maxdepth 1 -type f -executable -delete
 	rm -rf .git .gitignore docs
