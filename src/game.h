@@ -7,6 +7,8 @@
 
 // The number of cells in our ship
 #define NUMBER_SHIPS    5
+// Number of cells that a board saturated with ships will have
+#define TOTAL_SHIP_AREA 17
 // Number of cells each ship occupies
 #define DESTROYER_SIZE  2
 #define SUBMARINE_SIZE  3
@@ -26,6 +28,13 @@ enum orientation {HORIZONTAL = 0, VERTICAL = 1};
 //=============================================================================
 typedef enum cell board_t[COLUMNS][ROWS];
 //=============================================================================
+// Returns 0 if board has *not* placed all ships, 1 if all ships placed,
+// 2 if board empty.
+int board_full(board_t board);
+
+// Counts the number of times ship cells occurs.
+int count_ship_tiles(board_t board);
+
 // Prints out the `enum cell` value of the board cells to stdout.
 void print_board(board_t board);
 

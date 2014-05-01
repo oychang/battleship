@@ -228,10 +228,7 @@ int main(void)
             break;
         case NAME:
             rp.opcode = OK;
-            // printf("Request name length: %zd\n", strlen(rq.data.name));
             strncpy(session.names[player], rq.data.name, MAX_USERNAME_CHARS);
-            //session.names[player][MAX_USERNAME_CHARS-1] = '\0';
-            // printf("The player's name is: %s\n", session.names[player]);
             break;
         case PLACE:
             if (add_ship(session.boards[player], rq.data.ship.orientation,
@@ -254,7 +251,11 @@ int main(void)
         case READY:
             if (session.stage < PLAYING || session.current_player == player)
                 rp.opcode = OK;
-            else
+            else if (session.stage == PLACING_SHIPS &&
+                board_full(session.boards[0]) == 1 && board_full(session.boards[1]) == 1) {
+                session.current_player = 0;
+                session.stage = PLAYING;
+            } else
                 rp.opcode = WAIT;
             break;
         default:

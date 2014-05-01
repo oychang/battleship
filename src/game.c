@@ -1,6 +1,36 @@
 #include <stdio.h>
 #include "game.h"
 //=============================================================================
+int
+board_full(board_t board) {
+    switch (count_ship_tiles(board)) {
+    case 0:               return 2;
+    case TOTAL_SHIP_AREA: return 1;
+    default:              return 0;
+    }
+}
+//=============================================================================
+int
+count_ship_tiles(board_t board)
+{
+    int i, j;
+    int ships = 0;
+    for (i = 0; i < ROWS; i++) {
+        for (j = 0; j < COLUMNS; j++) {
+            switch (board[i][j]) {
+            case DESTROYER: case SUBMARINE:
+            case CRUISER: case BATTLESHIP:
+            case CARRIER:
+                ships++;
+                break;
+            default: break;
+            }
+        }
+    }
+
+    return ships;
+}
+//=============================================================================
 void
 print_board(board_t board)
 {
