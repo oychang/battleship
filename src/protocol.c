@@ -91,7 +91,7 @@ parse_request(char * buf, struct bs_req * req)
       printf("in protocol print: %s\n", req->data.name);
       printf("in prot print supposed 0: %d\n", req->data.name[3]);
       printf("What's in buffer?: %d\n", buf[4]);
-      printf("in protocol print length: %d\n", strlen(req->data.name));
+      printf("in protocol print length: %zd\n", strlen(req->data.name));
       /*
         strncpy(req->data.name, &buf[1], MAX_USERNAME_CHARS);
         printf("Name being parsed: %s\n", &buf[1]);

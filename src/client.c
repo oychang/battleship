@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
     board_t client_board = {{}, {}};
     int ship_placement;
     //    char ship_row;
-    
+
     struct addrinfo host_addr, *host_info, *option;
 
     // Get hostname from user; should be second argument in argv
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
         player_name[strlen(player_name) - 1] = '\0';
     }
     */
-    printf("Provided name of length %d was: %s\n", strlen(player_name), player_name);
+    printf("Provided name of length %zd was: %s\n", strlen(player_name), player_name);
     request.opcode = NAME;
     strcpy(request.data.name, player_name);
     request.data.name[strlen(player_name)] = '\0';
@@ -194,12 +194,12 @@ int main(int argc, char *argv[]) {
     while (ships_to_place > 0) {
         switch (ships_to_place) {
             case 1:
-	        printf("Ship to place: DESTROYER   size = %d\n", 
+	        printf("Ship to place: DESTROYER   size = %d\n",
                        get_ship_size(DESTROYER));
                 request.data.ship.type = DESTROYER;
                 break;
             case 2:
-	        printf("Ship to place: SUBMARINE   size = %d\n", 
+	        printf("Ship to place: SUBMARINE   size = %d\n",
 	               get_ship_size(SUBMARINE));
                 request.data.ship.type = SUBMARINE;
                 break;
@@ -259,7 +259,7 @@ int main(int argc, char *argv[]) {
                 printf("Coordinates: %d, %d\n", request.data.ship.coord[0], request.data.ship.coord[1]);
                 add_ship(client_board, request.data.ship.orientation,
 			 request.data.ship.coord, request.data.ship.type);
-		ships_to_place--; 
+		ships_to_place--;
                 break;
             case NOK:
                 printf("ALERT: Ship doesn't fit at given coordinates!\n");

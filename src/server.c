@@ -231,7 +231,7 @@ int main(void)
             break;
         case NAME:
             rp.opcode = OK;
-            printf("Request name length: %d\n", strlen(rq.data.name));
+            printf("Request name length: %zd\n", strlen(rq.data.name));
             strncpy(session.names[player], rq.data.name, MAX_USERNAME_CHARS);
             //session.names[player][MAX_USERNAME_CHARS-1] = '\0';
             printf("The player's name is: %s\n", session.names[player]);
