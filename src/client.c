@@ -173,6 +173,7 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
     resp_buf[resp_len] = '\0';
+    // TODO: treat lack of response as TIME TO DIE MOTHERFUCKER
     while (parse_response(resp_buf, &response) == WAIT) {
         printf("Server is not yet ready; trying again in 5 seconds\n");
         sleep(5);

@@ -177,13 +177,11 @@ int main(void)
         } else if (sock == -2) {
             // in essence, once anyone disconnects, the game is dead
             // TODO: prepare fins, send to all remaining socks
-            printf("got client disconnect\n");
             session.players--;
             session.stage = DONE;
             continue;
         // if too many connections
         } else if (player == -1 && session.players >= 2) {
-            printf("too many\n");
             rp.opcode = ERROR;
             strncpy(rp.data.message, "Too many players", MAXSTRING);
             resp_len = pack_response(response, &rp);
@@ -194,7 +192,7 @@ int main(void)
             sockets[session.players++] = sock;
             if (session.players == 2) {
                 session.stage = PLACING_SHIPS;
-                session.current_player = 0;
+                // session.current_player = 0;
                 // TODO: continue in this case?
             }
             // Read again from presumably the same socket the initial CONNECT
@@ -204,7 +202,7 @@ int main(void)
             // if first player has connected but not second
             // or if not this player's turn yet past NOT_ENOUGH_PLAYERS
             if ((session.stage == NOT_ENOUGH_PLAYERS && sockets[0] == -1) ||
-                (session.stage != NOT_ENOUGH_PLAYERS && session.current_player != player)) {
+                (session.stage >= PLAYING && session.current_player != player)) {
                 printf("wait\n");
                 rp.opcode = WAIT;
                 resp_len = pack_response(response, &rp);
@@ -231,10 +229,10 @@ int main(void)
             break;
         case NAME:
             rp.opcode = OK;
-            printf("Request name length: %zd\n", strlen(rq.data.name));
+            // printf("Request name length: %zd\n", strlen(rq.data.name));
             strncpy(session.names[player], rq.data.name, MAX_USERNAME_CHARS);
             //session.names[player][MAX_USERNAME_CHARS-1] = '\0';
-            printf("The player's name is: %s\n", session.names[player]);
+            // printf("The player's name is: %s\n", session.names[player]);
             break;
         case PLACE:
             if (add_ship(session.boards[player], rq.data.ship.orientation,
@@ -255,7 +253,7 @@ int main(void)
             }
             break;
         case READY:
-            if (session.current_player == player)
+            if (session.stage < PLAYING || session.current_player == player)
                 rp.opcode = OK;
             else
                 rp.opcode = WAIT;
