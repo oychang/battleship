@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <ctype.h>
 #include <netdb.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -27,6 +28,7 @@ int main(int argc, char *argv[]) {
     int ships_to_place = NUMBER_SHIPS;
     board_t client_board = {{}, {}};
     int ship_placement;
+    //    char ship_row;
     
     struct addrinfo host_addr, *host_info, *option;
 
@@ -217,15 +219,33 @@ int main(int argc, char *argv[]) {
                 request.data.ship.type = CARRIER;
 	        break;
         }
-        printf("Enter ship orientation (0 for horizontal, 1 for vertical): ");
-        scanf("%1d", &ship_placement);
-        request.data.ship.orientation = ship_placement;
-        printf("Enter the x coordinate: ");
-        scanf("%1d", &ship_placement);
-        request.data.ship.coord[0] = ship_placement;
-        printf("Enter the y coordinate: ");
-        scanf("%1d", &ship_placement);
-        request.data.ship.coord[1] = ship_placement;
+        printf("Enter ship orientation (0 = horizontal, 1 = vertical) : ");
+        ship_placement = getchar();
+        while (ship_placement != '0' && ship_placement != '1') {
+          while (getchar() != '\n');
+	  printf(" Invalid input. Enter 0 for horizontal, 1 for vertical: ");
+          ship_placement = getchar();
+        }
+        request.data.ship.orientation = (ship_placement - '0');
+        while (getchar() != '\n');
+        printf("Enter x coordinate (0 through 9) to designate column  : ");
+        ship_placement = getchar();
+        while (ship_placement < '0' || ship_placement > '9') {
+          while (getchar() != '\n');
+	  printf(" Invalid coordinate. Enter one integer between 0 and 9: ");
+          ship_placement = getchar();
+        }
+        request.data.ship.coord[0] = (ship_placement - '0');
+        while (getchar() != '\n');
+        printf("Enter the y coordinate (A through J) to designate row : ");
+        ship_placement = getchar();
+        while (ship_placement < 'A' || ship_placement > 'j' ||
+               (ship_placement < 'a' && ship_placement > 'J')) {
+	    while (getchar() != '\n');
+	    printf(" Invalid coordinate. Enter a character between A and J: ");
+            ship_placement = getchar();
+	}
+        request.data.ship.coord[1] = (toupper(ship_placement) - 'A');
         req_len = pack_request(req_buf, &request);
         send(sockfd, req_buf, req_len, 0);
         if ((resp_len = recv(sockfd, resp_buf, MAXDATASIZE - 1, 0)) == -1) {
@@ -250,6 +270,7 @@ int main(int argc, char *argv[]) {
         }
         print_board(client_board);
     }
+    printf("Well done, admiral! Your ships are in battle positions!\n");
 
     close(sockfd);
     return EXIT_SUCCESS;
