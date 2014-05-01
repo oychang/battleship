@@ -10,6 +10,8 @@
 #include <netdb.h>
 
 #include "server.h"
+
+// TODO: set current player when placing ships done
 //=============================================================================
 /* Get a valid socket for PORT & listen.
  * Returns -1 if failed to get a socket, otherwise a valid
@@ -190,13 +192,10 @@ int main(void)
         // if good initial connection
         } else if (player == -1 && session.stage == NOT_ENOUGH_PLAYERS) {
             sockets[session.players++] = sock;
-            if (session.players == 2) {
+            if (session.players == 2)
                 session.stage = PLACING_SHIPS;
-                // session.current_player = 0;
-                // TODO: continue in this case?
-            }
             // Read again from presumably the same socket the initial CONNECT
-            // TODO: perhaps just put a recv() here to make sure same socket
+            // xxx: perhaps just put a recv() here to make sure same socket
             select_wrapper(&master, &nfds, serverfd, &session, request);
         } else if (player != -1) {
             // if first player has connected but not second
