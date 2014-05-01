@@ -47,6 +47,10 @@ valid_position(board_t board, const enum orientation dir,
     const int size = get_ship_size(ship_type);
     if (size == -1)
         return 0;
+    else if (dir == HORIZONTAL && (size + coords[0]) > COLUMNS)
+        return 0;
+    else if (dir == VERTICAL && (size + coords[1]) > ROWS)
+        return 0;
 
     const int x = coords[0];
     const int y = coords[1];
