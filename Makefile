@@ -15,9 +15,11 @@ game.o: game.c game.h
 protocol.o: protocol.c protocol.h
 
 
-.PHONY: clean clean-submit
+.PHONY: clean clean-submit loc
 clean:
 	rm -f *.o
 clean-submit: clean
 	find . -maxdepth 1 -type f -executable -delete
 	rm -rf .git .gitignore docs
+loc:
+	find . -name '*.c' -print0 -o -name '*.h' -print0 | wc -l --files0-from=- | tail -n 1
