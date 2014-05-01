@@ -118,7 +118,7 @@ select_wrapper(fd_set * master, int * nfds, int serverfd,
             return clientfd;
         // if data to read & not the server
         } else {
-            if (recv(fd, buf, sizeof(buf), 0) <= 0) {
+            if (recv(fd, buf, MAXBUF, 0) <= 0) {
                 close(fd);
                 FD_CLR(fd, master);
                 return -2;
@@ -231,10 +231,9 @@ int main(void)
             break;
         case NAME:
             rp.opcode = OK;
+            printf("Request name length: %d\n", strlen(rq.data.name));
             strncpy(session.names[player], rq.data.name, MAX_USERNAME_CHARS);
-            session.names[player][MAX_USERNAME_CHARS-1] = '\0';
-            printf("received name: %d\n", request[4]);
-            printf("request 5 and 6: %d, %d\n", request[5], request[6]);
+            //session.names[player][MAX_USERNAME_CHARS-1] = '\0';
             printf("The player's name is: %s\n", session.names[player]);
             break;
         case PLACE:

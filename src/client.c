@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
         player_name[strlen(player_name) - 1] = '\0';
     }
     */
-    printf("Provided name was: %s\n", player_name);
+    printf("Provided name of length %d was: %s\n", strlen(player_name), player_name);
     request.opcode = NAME;
     strcpy(request.data.name, player_name);
     request.data.name[strlen(player_name)] = '\0';
