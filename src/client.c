@@ -303,7 +303,7 @@ int main(int argc, char *argv[]) {
             strike_indicator = 1; // 1 designates miss, by default 0 hit
         }
 
-        if (op == NOK || op == OK) {
+        if (op == NOK || (op == OK && request.opcode == READY)) {
             // comparing with 0 and 1 allows compare with other int
             // if the first run through, no hit or miss result
             if (strike_indicator == 0) {
@@ -345,7 +345,7 @@ int main(int argc, char *argv[]) {
 
             req_len = pack_request(req_buf, &request);
             send(sockfd, req_buf, req_len, 0);
-        } else if (op == WAIT) {
+        } else if (op == WAIT || (op == OK && request.opcode == FIRE)) {
             printf("Waiting for other player to finish firing...\n");
             sleep(5);
             request.opcode = READY;
