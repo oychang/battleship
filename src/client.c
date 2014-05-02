@@ -346,10 +346,10 @@ int main(int argc, char *argv[]) {
             request.opcode = READY;
             req_len = pack_request(req_buf, &request);
             send(sockfd, req_buf, req_len, 0);
-            continue; // this is confusing
+            break;
         case FIN:
             printf("Server is shutting down game...\n");
-            continue;
+            break;
         default:
             printf("Unknown opcode %d\n", response.opcode);
             request.opcode = READY;
