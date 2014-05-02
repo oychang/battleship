@@ -134,7 +134,6 @@ select_wrapper(fd_set * master, int * nfds, int serverfd,
 //=============================================================================
 int main(void)
 {
-
     // Get a socket to listen on PORT
     const int serverfd = setup_server();
     if (serverfd == -1)
@@ -240,23 +239,33 @@ int main(void)
         case FIRE:
             cell_value = session.boards[player][rq.data.coord[0]][rq.data.coord[1]];
             // if firing on something with no ship
-            if (cell_value == EMPTY || cell_value == MISS || cell_value == HIT)
+            if (cell_value == EMPTY || cell_value == MISS || cell_value == HIT) {
                 rp.opcode = NOK;
-            else {
+            } else {
                 session.boards[player][rq.data.coord[0]][rq.data.coord[1]] = HIT;
                 rp.opcode = OK;
                 session.current_player = (session.current_player == 0 ? 1 : 0);
             }
             break;
         case READY:
-            if (session.stage < PLAYING || session.current_player == player)
+            if (session.stage == PLACING_SHIPS) {
+                // if initial placement, send ok
+                // if boards not full, send wait
+                // if boards full, send ok
+                if (count_ship_tiles(session.boards[player]) == 0) {
+                    rp.opcode = OK;
+                } else if (board_full(session.boards[0]) && board_full(session.boards[1])) {
+                    session.stage = PLAYING;
+                    session.current_player = 0;
+                    rp.opcode = OK;
+                } else {
+                    rp.opcode = WAIT;
+                }
+            } else if (session.current_player == player) {
                 rp.opcode = OK;
-            else if (session.stage == PLACING_SHIPS &&
-                board_full(session.boards[0]) == 1 && board_full(session.boards[1]) == 1) {
-                session.current_player = 0;
-                session.stage = PLAYING;
-            } else
+            } else {
                 rp.opcode = WAIT;
+            }
             break;
         default:
             handle_error(&rp, "Invalid Opcode");

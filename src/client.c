@@ -256,10 +256,24 @@ int main(int argc, char *argv[]) {
             printf("What status is this?!?\n");
             break;
         }
+
         print_board(client_board);
     }
-    printf("Well done, admiral! Your ships are in battle positions!\n");
 
+    printf("Well done, admiral! Your ships are in battle positions!\n");
+    request.opcode = READY;
+    req_len = pack_request(req_buf, &request);
+    do {
+        printf("Waiting for other player to connect and place ships...\n");
+        sleep(5);
+        if (send(sockfd, req_buf, req_len, 0) == -1)
+            perror("send");
+        if (recv(sockfd, resp_buf, MAXDATASIZE, 0) == -1)
+            perror("recv");
+
+        parse_response(resp_buf, &response);
+    } while (response.opcode != OK);
+    printf("Ships placed! The game is afoot.\n");
 
 
     close(sockfd);
