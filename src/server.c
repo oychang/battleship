@@ -11,7 +11,6 @@
 
 #include "server.h"
 
-// TODO: set current player when placing ships done
 //=============================================================================
 /* Get a valid socket for PORT & listen.
  * Returns -1 if failed to get a socket, otherwise a valid
@@ -177,9 +176,9 @@ int main(void)
         // if disconnect
         } else if (sock == -2) {
             // in essence, once anyone disconnects, the game is dead
-            // TODO: prepare fins, send to all remaining socks
             session.players--;
-            session.stage = DONE;
+            // TODO: prepare fins, send to all remaining socks
+            // session.stage = DONE;
             continue;
         // if too many connections
         } else if (player == -1 && session.players >= 2) {
@@ -248,6 +247,7 @@ int main(void)
             }
             break;
         case READY:
+            // TODO: send fin on end
             if (session.stage == PLACING_SHIPS) {
                 // if initial placement, send ok
                 // if boards not full, send wait

@@ -26,7 +26,8 @@ int main(int argc, char *argv[]) {
     size_t req_len;
     int addr, resp_len, index;
     int ships_to_place = NUMBER_SHIPS;
-    board_t client_board = {{}, {}};
+    board_t client_board = {};
+    board_t opponent_board = {};
     int ship_placement;
 
     struct addrinfo host_addr, *host_info, *option;
@@ -264,7 +265,7 @@ int main(int argc, char *argv[]) {
     request.opcode = READY;
     req_len = pack_request(req_buf, &request);
     do {
-        printf("Waiting for other player to connect and place ships...\n");
+        printf("Waiting for other player to place ships...\n");
         sleep(5);
         if (send(sockfd, req_buf, req_len, 0) == -1)
             perror("send");
@@ -274,6 +275,26 @@ int main(int argc, char *argv[]) {
         parse_response(resp_buf, &response);
     } while (response.opcode != OK);
     printf("Ships placed! The game is afoot.\n");
+
+    // TODO: perhaps put an ABOUT request here and print the player names
+
+    // Start firing
+    // TODO: implement
+    do {
+        printf("Waiting for other player to finish firing...\n");
+        sleep(5);
+        if (send(sockfd, req_buf, req_len, 0) == -1)
+            perror("send");
+        if (recv(sockfd, resp_buf, MAXDATASIZE, 0) == -1)
+            perror("recv");
+
+        parse_response(resp_buf, &response);
+    } while (response.opcode != FIN);
+
+    if (count_ship_tiles(opponent_board) == 0)
+        printf("You Won!\n");
+    else
+        printf("You lost!\n");
 
 
     close(sockfd);
