@@ -280,6 +280,9 @@ int main(int argc, char *argv[]) {
 
     // Start firing
     // TODO: implement
+    // NOTE: disconnect on FIN...
+    // should be ready to accept a OK (good place), NOK (bad place),
+    // wait (not turn), or fin (game done)
     do {
         printf("Waiting for other player to finish firing...\n");
         sleep(5);
