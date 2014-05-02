@@ -177,8 +177,7 @@ int main(void)
         } else if (sock == -2) {
             // in essence, once anyone disconnects, the game is dead
             session.players--;
-            // TODO: prepare fins, send to all remaining socks
-            // session.stage = DONE;
+            session.stage = DONE;
             continue;
         // if too many connections
         } else if (player == -1 && session.players >= 2) {
