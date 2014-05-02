@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
         printf("Error: %s\n", response.data.message);
         break;
     default:
-        printf("What opcode is this?!?\n");
+        printf("Unknown opcode %d\n", response.opcode);
         break;
     }
 
@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
         printf("Player 1: %s\n", response.data.session.names[0]);
         printf("Player 2: %s\n", response.data.session.names[1]);
     } else {
-        printf("What opcode is this?!?\n");
+        printf("Unknown opcode %d\n", response.opcode);
     }
 
     printf("Beginning to poll server to see if ready!\n");
@@ -259,7 +259,7 @@ int main(int argc, char *argv[]) {
             printf("ALERT: Ship doesn't fit at given coordinates!\n");
             break;
         default:
-            printf("What status is this?!?\n");
+            printf("Unknown opcode %d\n", response.opcode);
             break;
         }
 
@@ -292,8 +292,8 @@ int main(int argc, char *argv[]) {
         response.data.session.names[1]);
 
     // Start firing
-    // should be ready to accept a OK (good place), NOK (bad place),
-    // wait (not turn), or fin (game done)
+    // should be ready to accept a HOK (good place), NOK (bad place),
+    // OK (is turn), WAIT (not turn), or FIN (game done)
     request.opcode = READY;
     req_len = pack_request(req_buf, &request);
     send(sockfd, req_buf, req_len, 0);
@@ -376,11 +376,14 @@ int main(int argc, char *argv[]) {
         }
     } while (response.opcode != FIN);
 
+    // Client keeps track of how many strikes remain until victory
+    // If this number reaches 0, then client has wiped out enemy's ships
     if (remaining_strike_zones == 0)
         printf("You Won!\n");
     else
         printf("You Lost!\n");
 
+    // Game has terminated --> close socket, report successful run
     close(sockfd);
     return EXIT_SUCCESS;
 }
