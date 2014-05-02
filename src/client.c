@@ -28,7 +28,6 @@ int main(int argc, char *argv[]) {
     int ships_to_place = NUMBER_SHIPS;
     board_t client_board = {{}, {}};
     int ship_placement;
-    //    char ship_row;
 
     struct addrinfo host_addr, *host_info, *option;
 
@@ -41,23 +40,22 @@ int main(int argc, char *argv[]) {
     memset(&host_addr, 0, sizeof(struct addrinfo));
     host_addr.ai_family = AF_UNSPEC;
     host_addr.ai_socktype = SOCK_STREAM;
-
     if ((addr = getaddrinfo(argv[1], PORT, &host_addr, &host_info)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(addr));
         return EXIT_FAILURE;
     }
 
-    for(option = host_info; option != NULL; option = option->ai_next) {
+    for (option = host_info; option != NULL; option = option->ai_next) {
         if ((sockfd = socket(option->ai_family, option->ai_socktype,
-			     option->ai_protocol)) == -1) {
-	    perror("client: socket");
+                 option->ai_protocol)) == -1) {
+            perror("client: socket");
             continue;
         }
         if (connect(sockfd, option->ai_addr, option->ai_addrlen) == -1) {
-	    close(sockfd);
+            close(sockfd);
             perror("client: connect");
             continue;
-	}
+        }
         break;
     }
     if (option == NULL) {
@@ -70,7 +68,6 @@ int main(int argc, char *argv[]) {
     request.opcode = CONNECT;
     req_len = pack_request(req_buf, &request);
     send(sockfd, req_buf, req_len, 0);
-    printf("Sending connect request to server.\n");
 
     // Listen for a response
     if ((resp_len = recv(sockfd, resp_buf, MAXDATASIZE, 0)) == -1) {
@@ -79,38 +76,30 @@ int main(int argc, char *argv[]) {
     }
 
     switch (parse_response(resp_buf, &response)) {
-        case OK:
-	    printf("Alert: Successfully connected to server!\n");
-            break;
-        case ERROR:
-            printf("Error: %s\n", response.data.message);
-            break;
-        default:
-	    printf("What opcode is this?!?\n");
-	    break;
+    case OK:
+        printf("Alert: Successfully connected to server!\n");
+        break;
+    case ERROR:
+        printf("Error: %s\n", response.data.message);
+        break;
+    default:
+        printf("What opcode is this?!?\n");
+        break;
     }
 
     // Send request to establish player name (use protocol.c)
     printf("Please provide your name (max 7 chars): ");
     fgets(player_name, MAX_USERNAME_CHARS, stdin);
     for (index = 0; index < MAX_USERNAME_CHARS; index++) {
-      if (player_name[index] == '\n') {
-        player_name[index] = '\0'; // replace newline with null char
-        break;
-      }
+        if (player_name[index] == '\n') {
+            player_name[index] = '\0'; // replace newline with null char
+            break;
+        }
     }
-    /*
-    if (strlen(player_name) < MAX_USERNAME_CHARS - 1) {
-        player_name[strlen(player_name) - 1] = '\0';
-    }
-    */
-    printf("Provided name of length %zd was: %s\n", strlen(player_name), player_name);
     request.opcode = NAME;
     strcpy(request.data.name, player_name);
     request.data.name[strlen(player_name)] = '\0';
-    printf("Packaged name was: %s\n", request.data.name);
     req_len = pack_request(req_buf, &request);
-    printf("Pacakage length is: %zd\n", req_len);
     send(sockfd, req_buf, req_len, 0);
     printf("Sending player naming request to server.\n");
 
@@ -119,7 +108,6 @@ int main(int argc, char *argv[]) {
         perror("recv");
         exit(EXIT_FAILURE);
     }
-    printf("name responese opcode (0 = okay) = %d\n", resp_buf[0]);
 
     // Request information about the game from the server
     request.opcode = INFO;
@@ -132,33 +120,33 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
     resp_buf[resp_len] = '\0';
-    printf("Received response length: %d\n", resp_len);
 
     if (parse_response(resp_buf, &response) == ABOUT) {
         printf("\nBATTLESHIP Game Information\n");
         printf("---------------------------\n");
-        printf("Current game state: ");
+/*        printf("Current game state: ");
         switch (response.data.session.stage) {
-            case NOT_ENOUGH_PLAYERS:
-	        printf("Not enough players. Waiting for players to join...\n");
-                break;
-            case PLACING_SHIPS:
-                printf("Both players are placing their ships.\n");
-                break;
-            case PLAYING:
-                printf("Game is underway. Players are battling it out!\n");
-                break;
-            case DONE:
-                printf("Game has concluded.");
-                break;
-            default:
-                printf("What status is this?!?\n");
-                break;
-        }
+        case NOT_ENOUGH_PLAYERS:
+            printf("Not enough players. Waiting for players to join...\n");
+            break;
+        case PLACING_SHIPS:
+            printf("Both players are placing their ships.\n");
+            break;
+        case PLAYING:
+            printf("Game is underway. Players are battling it out!\n");
+            break;
+        case DONE:
+            printf("Game has concluded.");
+            break;
+        default:
+            printf("What status is this?!?\n");
+            break;
+        }*/
+
         printf("Player 1: %s\n", response.data.session.names[0]);
         printf("Player 2: %s\n", response.data.session.names[1]);
     } else {
-	printf("What opcode is this?!?\n");
+        printf("What opcode is this?!?\n");
     }
 
     printf("Beginning to poll server to see if ready!\n");
@@ -173,7 +161,7 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
     resp_buf[resp_len] = '\0';
-    // TODO: treat lack of response as TIME TO DIE MOTHERFUCKER
+    // TODO: treat lack of response as TIME TO DIE
     while (parse_response(resp_buf, &response) == WAIT) {
         printf("Server is not yet ready; trying again in 5 seconds\n");
         sleep(5);
@@ -188,37 +176,36 @@ int main(int argc, char *argv[]) {
 
     // If we got here, that means two clients have connected to server
     // The client is now able to place ships
-
     printf("ALERT: The time has come to place your ships, admiral!\n");
     print_board(client_board);
     request.opcode = PLACE;
     while (ships_to_place > 0) {
         switch (ships_to_place) {
-            case 1:
-	        printf("Ship to place: DESTROYER   size = %d\n",
-                       get_ship_size(DESTROYER));
-                request.data.ship.type = DESTROYER;
-                break;
-            case 2:
-	        printf("Ship to place: SUBMARINE   size = %d\n",
-	               get_ship_size(SUBMARINE));
-                request.data.ship.type = SUBMARINE;
-                break;
-            case 3:
-                printf("Ship to place: CRUISER     size = %d\n",
-                       get_ship_size(CRUISER));
-                request.data.ship.type = CRUISER;
-	        break;
-            case 4:
-                printf("Ship to place: BATTLESHIP  size = %d\n",
-                       get_ship_size(BATTLESHIP));
-                request.data.ship.type = BATTLESHIP;
-                break;
-            case 5:
-	        printf("Ship to place: CARRIER     size = %d\n",
-	               get_ship_size(CARRIER));
-                request.data.ship.type = CARRIER;
-	        break;
+        case 1:
+        printf("Ship to place: DESTROYER   size = %d\n",
+                   get_ship_size(DESTROYER));
+            request.data.ship.type = DESTROYER;
+            break;
+        case 2:
+        printf("Ship to place: SUBMARINE   size = %d\n",
+               get_ship_size(SUBMARINE));
+            request.data.ship.type = SUBMARINE;
+            break;
+        case 3:
+            printf("Ship to place: CRUISER     size = %d\n",
+                   get_ship_size(CRUISER));
+            request.data.ship.type = CRUISER;
+            break;
+        case 4:
+            printf("Ship to place: BATTLESHIP  size = %d\n",
+                   get_ship_size(BATTLESHIP));
+            request.data.ship.type = BATTLESHIP;
+            break;
+        case 5:
+        printf("Ship to place: CARRIER     size = %d\n",
+               get_ship_size(CARRIER));
+            request.data.ship.type = CARRIER;
+            break;
         }
 
         printf("Enter ship orientation (0 = horizontal, 1 = vertical) : ");
@@ -255,23 +242,25 @@ int main(int argc, char *argv[]) {
         }
         resp_buf[resp_len] = '\0';
         switch (parse_response(resp_buf, &response)) {
-            case OK:
-                printf("ALERT: Successfully placed the ship!\n");
-                printf("Coordinates: %d, %d\n", request.data.ship.coord[0], request.data.ship.coord[1]);
-                add_ship(client_board, request.data.ship.orientation,
-			 request.data.ship.coord, request.data.ship.type);
-		ships_to_place--;
-                break;
-            case NOK:
-                printf("ALERT: Ship doesn't fit at given coordinates!\n");
-	        break;
-            default:
-                printf("What status is this?!?\n");
-                break;
+        case OK:
+            printf("ALERT: Successfully placed the ship!\n");
+            printf("Coordinates: %d, %d\n", request.data.ship.coord[0], request.data.ship.coord[1]);
+            add_ship(client_board, request.data.ship.orientation,
+            request.data.ship.coord, request.data.ship.type);
+            ships_to_place--;
+            break;
+        case NOK:
+            printf("ALERT: Ship doesn't fit at given coordinates!\n");
+            break;
+        default:
+            printf("What status is this?!?\n");
+            break;
         }
         print_board(client_board);
     }
     printf("Well done, admiral! Your ships are in battle positions!\n");
+
+
 
     close(sockfd);
     return EXIT_SUCCESS;
