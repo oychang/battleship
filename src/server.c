@@ -167,7 +167,7 @@ int main(void)
         int sock = select_wrapper(&master, &nfds, serverfd, &session, request);
         // 0 = first player, 1 = second player, -1 = neither
         int player = (sock == sockets[0] ? 0 : sock == sockets[1] ? 1 : -1);
-        int opponent = (player == -1 ? -1 : player == 0 ? 1 : 0);
+        int opponent = (session.current_player == 1 ? 0 : 1);
         printf("player = %d\n", player);
 
         // if no useful data
@@ -251,10 +251,10 @@ int main(void)
                     send(sockets[0], response, resp_len, 0);
                     send(sockets[1], response, resp_len, 0);
                     session.stage = DONE;
-                    continue;
+                    continue; // implicit end of while event loop
                 } else {
                     rp.opcode = OK;
-                    session.current_player = (session.current_player == 0 ? 1 : 0);
+                    session.current_player = opponent;
                 }
             }
             break;
