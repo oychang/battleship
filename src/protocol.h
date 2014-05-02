@@ -112,7 +112,7 @@ struct bs_req {
 //     This is the response to any request.
 //     A char[] string is requrned.
 enum bs_resp_opcode {
-    OK = 0, ABOUT = 1, WAIT = 2, NOK = 3, FIN = 4, ERROR = 5
+    OK = 0, ABOUT = 1, WAIT = 2, NOK = 3, FIN = 4, ERROR = 5, HOK = 6
 };
 struct bs_resp {
     enum bs_resp_opcode opcode;

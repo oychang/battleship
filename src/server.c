@@ -236,10 +236,11 @@ int main(void)
                 rp.opcode = NOK;
             break;
         case FIRE:
-            cell_value = session.boards[player][rq.data.coord[0]][rq.data.coord[1]];
+            cell_value = session.boards[opponent][rq.data.coord[0]][rq.data.coord[1]];
             // if firing on something with no ship
             if (cell_value == EMPTY || cell_value == MISS || cell_value == HIT) {
                 rp.opcode = NOK;
+                session.current_player = opponent;
             } else {
                 // should go in other player's board
                 session.boards[opponent][rq.data.coord[0]][rq.data.coord[1]] = HIT;
@@ -253,7 +254,7 @@ int main(void)
                     session.stage = DONE;
                     continue; // implicit end of while event loop
                 } else {
-                    rp.opcode = OK;
+                    rp.opcode = HOK;
                     session.current_player = opponent;
                 }
             }

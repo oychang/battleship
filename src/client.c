@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
     board_t client_board = {};
     board_t opp_board = {};
     int ship_placement, strike_target;
-    int strike_indicator = -1;
+    int strike_indicator;
     int fire_x, fire_y, invalid_location;
 
     struct addrinfo host_addr, *host_info, *option;
@@ -299,26 +299,36 @@ int main(int argc, char *argv[]) {
         enum bs_resp_opcode op = parse_response(resp_buf, &response);
 
         if (op == NOK) {
-            printf("Hit nothing...try again\n");
             strike_indicator = 1; // 1 designates miss, by default 0 hit
-        }
+        } else if (op == HOK) {
+	    strike_indicator = 0;
+	}
 
-        if (op == NOK || (op == OK && request.opcode == READY)) {
+        if (op == NOK || op == HOK) {
             // comparing with 0 and 1 allows compare with other int
             // if the first run through, no hit or miss result
             if (strike_indicator == 0) {
-                opp_board[fire_x][fire_y] = 'x';
+	        printf("ALERT: Clean hit; you've damaged a ship!\n\n");
+                opp_board[fire_x][fire_y] = HIT;
             } else if (strike_indicator == 1) {
-                opp_board[fire_x][fire_y] = 'o';
+	        printf("ALERT: Hit nothing but ocean... too bad!\n\n");
+                opp_board[fire_x][fire_y] = MISS;
             }
-            strike_indicator = 0; // reset indicator for next run through
 
+            printf("Waiting for other player to finish firing...\n");
+            sleep(5);
+            request.opcode = READY;
+            req_len = pack_request(req_buf, &request);
+            send(sockfd, req_buf, req_len, 0);
+	} else if (op == OK && request.opcode == READY) {
             request.opcode = FIRE;
             print_board(opp_board);
             printf("Ship's cannons primed for firing. Issue the command!\n");
 
+	    // client checks if a location has already been targeted before
             do {
-               invalid_location = 0;
+                invalid_location = 0;
+	    
                 printf("Enter target x [column] coordinate (0 through 9)  : ");
                 scanf("%d", &strike_target);
                 while (strike_target < 0 || strike_target > 9) {
@@ -336,16 +346,17 @@ int main(int argc, char *argv[]) {
                     strike_target = toupper(strike_target);
                 }
                 fire_y = request.data.coord[1] = strike_target - 'A';
-
-                if (opp_board[fire_x][fire_y] != 0) {
+		
+                if (opp_board[fire_x][fire_y] != EMPTY) {
                     printf("ALERT: Previously shot location; try again!\n");
                     invalid_location = 1;
                 }
             } while (invalid_location == 1);
-
+		
             req_len = pack_request(req_buf, &request);
             send(sockfd, req_buf, req_len, 0);
-        } else if (op == WAIT || (op == OK && request.opcode == FIRE)) {
+        } else if (op == WAIT || (op == HOK && request.opcode == FIRE)
+                   || (op == NOK && request.opcode == FIRE)) {
             printf("Waiting for other player to finish firing...\n");
             sleep(5);
             request.opcode = READY;
@@ -364,7 +375,7 @@ int main(int argc, char *argv[]) {
     if (count_ship_tiles(opp_board) == 0)
         printf("You Won!\n");
     else
-        printf("You lost!\n");
+        printf("You Lost!\n");
 
 
     close(sockfd);

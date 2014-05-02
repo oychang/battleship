@@ -112,7 +112,7 @@ parse_response(char * buf, struct bs_resp * resp)
         strncpy(resp->data.message, &buf[1], MAXSTRING);
         break;
     // noops -- these contain no additional data
-    case NOK: case FIN: case OK: case WAIT: default:
+    case NOK: case HOK: case FIN: case OK: case WAIT: default:
         break;
     }
 
