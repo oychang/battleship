@@ -28,8 +28,7 @@ enum orientation {HORIZONTAL = 0, VERTICAL = 1};
 //=============================================================================
 typedef enum cell board_t[COLUMNS][ROWS];
 //=============================================================================
-// Returns 0 if board has *not* placed all ships, 1 if all ships placed,
-// 2 if board empty.
+// Returns 0 if board is not full, 1 if full
 int board_full(board_t board);
 
 // Counts the number of times ship cells occurs.

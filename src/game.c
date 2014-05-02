@@ -3,11 +3,7 @@
 //=============================================================================
 int
 board_full(board_t board) {
-    switch (count_ship_tiles(board)) {
-    case 0:               return 2;
-    case TOTAL_SHIP_AREA: return 1;
-    default:              return 0;
-    }
+    return count_ship_tiles(board) == TOTAL_SHIP_AREA;
 }
 //=============================================================================
 int
