@@ -259,7 +259,6 @@ int main(void)
             }
             break;
         case READY:
-            // TODO: send fin on end
             if (session.stage == PLACING_SHIPS) {
                 // if initial placement, send ok
                 // if boards not full, send wait
