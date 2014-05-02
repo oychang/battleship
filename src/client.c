@@ -289,15 +289,47 @@ int main(int argc, char *argv[]) {
     // Start firing
     // should be ready to accept a OK (good place), NOK (bad place),
     // wait (not turn), or fin (game done)
+    request.opcode = READY;
+    req_len = pack_request(req_buf, &request);
+    send(sockfd, req_buf, req_len, 0);
     do {
-        printf("Waiting for other player to finish firing...\n");
-        sleep(5);
-        if (send(sockfd, req_buf, req_len, 0) == -1)
-            perror("send");
-        if (recv(sockfd, resp_buf, MAXDATASIZE, 0) == -1)
-            perror("recv");
+        recv(sockfd, resp_buf, MAXDATASIZE, 0);
+        switch (parse_response(resp_buf, &response)) {
 
-        parse_response(resp_buf, &response);
+        case NOK:
+            printf("Hit nothing...\n");
+            // todo: add hit marker to opponent board
+            // xxx: note fall through, might not be what we want
+        case OK:
+            // this is where we can do a fire
+            request.opcode = FIRE;
+
+            // todo: probably want a while input loop like in placing ships
+            // todo: valid_position -> add to opponent board ->
+            // custom draw function, perhaps with x's for hits, o's for misses
+            print_board(opponent_board);
+
+
+            req_len = pack_request(req_buf, &request);
+            send(sockfd, req_buf, req_len, 0);
+            break;
+        case WAIT:
+            printf("Waiting for other player to finish firing...\n");
+            sleep(5);
+            request.opcode = READY;
+            req_len = pack_request(req_buf, &request);
+            send(sockfd, req_buf, req_len, 0);
+            continue; // this is confusing
+        case FIN:
+            printf("Server is shutting down game...\n");
+            continue;
+        default:
+            printf("Unknown opcode %d\n", response.opcode);
+            request.opcode = READY;
+            req_len = pack_request(req_buf, &request);
+            send(sockfd, req_buf, req_len, 0);
+            break;
+        }
     } while (response.opcode != FIN);
 
     if (count_ship_tiles(opponent_board) == 0)
