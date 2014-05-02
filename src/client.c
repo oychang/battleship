@@ -296,33 +296,29 @@ int main(int argc, char *argv[]) {
     send(sockfd, req_buf, req_len, 0);
     do {
         recv(sockfd, resp_buf, MAXDATASIZE, 0);
-        switch (parse_response(resp_buf, &response)) {
+        enum bs_resp_opcode op = parse_response(resp_buf, &response);
 
-        case NOK:
-            printf("Hit nothing...\n");
-            // todo: add hit marker to opponent board
-            // xxx: note fall through, might not be what we want
+        if (op == NOK) {
+            printf("Hit nothing...try again\n");
             strike_indicator = 1; // 1 designates miss, by default 0 hit
-        case OK:
-	    // comparing with 0 and 1 allows compare with other int
+        }
+
+        if (op == NOK || op == OK) {
+            // comparing with 0 and 1 allows compare with other int
             // if the first run through, no hit or miss result
-            // todo: valid_position -> add to opponent board ->
-            // custom draw function, perhaps with x's for hits, o's for misses
-	    if (strike_indicator == 0) {
+            if (strike_indicator == 0) {
                 opp_board[fire_x][fire_y] = 'x';
             } else if (strike_indicator == 1) {
                 opp_board[fire_x][fire_y] = 'o';
             }
             strike_indicator = 0; // reset indicator for next run through
 
-            // this is where we can do a fire
-            // todo: probably want a while input loop like in placing ships
             request.opcode = FIRE;
             print_board(opp_board);
             printf("Ship's cannons primed for firing. Issue the command!\n");
 
             do {
-	        invalid_location = 0;
+               invalid_location = 0;
                 printf("Enter target x [column] coordinate (0 through 9)  : ");
                 scanf("%d", &strike_target);
                 while (strike_target < 0 || strike_target > 9) {
@@ -333,7 +329,7 @@ int main(int argc, char *argv[]) {
 
                 printf("Enter target y [row] coordinate (A through J)     : ");
                 scanf(" %c", (char*)&strike_target);
-	        strike_target = toupper(strike_target);
+                strike_target = toupper(strike_target);
                 while (strike_target < 'A' || strike_target > 'J') {
                     printf("Invalid coordinate. Enter a char (A through J): ");
                     scanf(" %c", (char*)&strike_target);
@@ -346,25 +342,22 @@ int main(int argc, char *argv[]) {
                     invalid_location = 1;
                 }
             } while (invalid_location == 1);
+
             req_len = pack_request(req_buf, &request);
             send(sockfd, req_buf, req_len, 0);
-            break;
-        case WAIT:
+        } else if (op == WAIT) {
             printf("Waiting for other player to finish firing...\n");
             sleep(5);
             request.opcode = READY;
             req_len = pack_request(req_buf, &request);
             send(sockfd, req_buf, req_len, 0);
-            break;
-        case FIN:
+        } else if (op == FIN) {
             printf("Server is shutting down game...\n");
-            break;
-        default:
+        } else {
             printf("Unknown opcode %d\n", response.opcode);
             request.opcode = READY;
             req_len = pack_request(req_buf, &request);
             send(sockfd, req_buf, req_len, 0);
-            break;
         }
     } while (response.opcode != FIN);
 
