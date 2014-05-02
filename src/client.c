@@ -244,7 +244,7 @@ int main(int argc, char *argv[]) {
         switch (parse_response(resp_buf, &response)) {
         case OK:
             printf("ALERT: Successfully placed the ship!\n");
-            printf("Coordinates: %d, %d\n", request.data.ship.coord[0], request.data.ship.coord[1]);
+            // printf("Coordinates: %d, %d\n", request.data.ship.coord[0], request.data.ship.coord[1]);
             add_ship(client_board, request.data.ship.orientation,
             request.data.ship.coord, request.data.ship.type);
             ships_to_place--;

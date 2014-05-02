@@ -15,10 +15,6 @@ pack_request(char * buf, struct bs_req * request)
         // ensure null-terminated
         request->data.name[MAX_USERNAME_CHARS - 1] = '\0';
         strncpy(&buf[size], request->data.name, MAX_USERNAME_CHARS);
-        /*printf("Result of packing: %s\n", request->data.name);
-        if (request->data.name[strlen(request->data.name)] == '\0') {
-      printf("Null-terminating character was correctly packed in\n");
-    }*/
         size += strlen(request->data.name) + 1;
         break;
     case PLACE:
@@ -80,23 +76,7 @@ parse_request(char * buf, struct bs_req * req)
     req->opcode = buf[0];
     switch (buf[0]) {
     case NAME:
-      /*for (index = 1; index <= MAX_USERNAME_CHARS; index++) {
-        req->data.name[index - 1] = buf[index];*/
-/*        printf("Goes through for loop, %d\n", (int)(buf[index]));
-        if (buf[index] == '\0') {
-          printf("reached null character at index: %d\n", index);
-          break;
-    }
-      }
-      printf("in protocol print: %s\n", req->data.name);
-      printf("in prot print supposed 0: %d\n", req->data.name[3]);
-      printf("What's in buffer?: %d\n", buf[4]);
-      printf("in protocol print length: %zd\n", strlen(req->data.name));*/
-
         strncpy(req->data.name, &buf[1], MAX_USERNAME_CHARS);
-/*        printf("Name being parsed: %s\n", &buf[1]);
-        printf("Name being structed: %s\n", req->data.name);*/
-
         break;
     case PLACE:
         req->data.ship.type = buf[1];
