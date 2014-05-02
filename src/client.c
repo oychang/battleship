@@ -376,12 +376,18 @@ int main(int argc, char *argv[]) {
         }
     } while (response.opcode != FIN);
 
+    // if client sent a fire request, and response was fin, client won
+    // because one client's shot gets processed before the next's
+    if (request.opcode == FIRE) {
+        remaining_strike_zones--;
+    }
+
     // Client keeps track of how many strikes remain until victory
     // If this number reaches 0, then client has wiped out enemy's ships
     if (remaining_strike_zones == 0)
-        printf("You Won!\n");
+        printf("ALERT: Congratulations, you won!\n");
     else
-        printf("You Lost!\n");
+        printf("ALERT: You lost; better luck next time!\n");
 
     // Game has terminated --> close socket, report successful run
     close(sockfd);
