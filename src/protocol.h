@@ -88,7 +88,7 @@ struct bs_req {
 // of the following opcodes:
 // 0 = ok
 //     Acknowledgment of receiving a request, successfully executed.
-//     This is the response to a CONNECT, and well-formed NAME, good FIRE.
+//     This is the response to a CONNECT, and well-formed NAME, READY.
 //     No other data is returned.
 // 1 = about
 //     Response contains information about the game session.
@@ -111,6 +111,9 @@ struct bs_req {
 //     The request could be not completed for a certain reason.
 //     This is the response to any request.
 //     A char[] string is requrned.
+// 6 = Player registered a hit on the desired cell
+//     This is the response to a FIRE.
+//     No other data is returned.
 enum bs_resp_opcode {
     OK = 0, ABOUT = 1, WAIT = 2, NOK = 3, FIN = 4, ERROR = 5, HOK = 6
 };

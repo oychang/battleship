@@ -31,6 +31,9 @@ int main(int argc, char *argv[]) {
     int ship_placement, strike_target;
     int strike_indicator;
     int fire_x, fire_y, invalid_location;
+    int remaining_strike_zones = get_ship_size(CARRIER) + 
+                       get_ship_size(BATTLESHIP) + get_ship_size(CRUISER) + 
+                       get_ship_size(SUBMARINE) + get_ship_size(DESTROYER);
 
     struct addrinfo host_addr, *host_info, *option;
 
@@ -310,6 +313,7 @@ int main(int argc, char *argv[]) {
             if (strike_indicator == 0) {
 	        printf("ALERT: Clean hit; you've damaged a ship!\n\n");
                 opp_board[fire_x][fire_y] = HIT;
+                remaining_strike_zones--;
             } else if (strike_indicator == 1) {
 	        printf("ALERT: Hit nothing but ocean... too bad!\n\n");
                 opp_board[fire_x][fire_y] = MISS;
@@ -372,11 +376,10 @@ int main(int argc, char *argv[]) {
         }
     } while (response.opcode != FIN);
 
-    if (count_ship_tiles(opp_board) == 0)
+    if (remaining_strike_zones == 0)
         printf("You Won!\n");
     else
         printf("You Lost!\n");
-
 
     close(sockfd);
     return EXIT_SUCCESS;
