@@ -274,13 +274,19 @@ int main(int argc, char *argv[]) {
 
         parse_response(resp_buf, &response);
     } while (response.opcode != OK);
-    printf("Ships placed! The game is afoot.\n");
 
-    // TODO: perhaps put an ABOUT request here and print the player names
+    // print the player names
+    // assume nothing here breaks, heh
+    printf("\nShips placed! The game is afoot.\n");
+    request.opcode = ABOUT;
+    req_len = pack_request(req_buf, &request);
+    send(sockfd, req_buf, req_len, 0);
+    recv(sockfd, resp_buf, MAXDATASIZE, 0);
+    parse_response(resp_buf, &response);
+    printf("Player 1: %s, Player 2: %s\n", response.data.session.names[0],
+        response.data.session.names[1]);
 
     // Start firing
-    // TODO: implement
-    // NOTE: disconnect on FIN...
     // should be ready to accept a OK (good place), NOK (bad place),
     // wait (not turn), or fin (game done)
     do {
