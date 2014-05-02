@@ -30,6 +30,7 @@ int main(int argc, char *argv[]) {
     board_t opp_board = {};
     int ship_placement, strike_target;
     int strike_indicator = -1;
+    int fire_x, fire_y, invalid_location;
 
     struct addrinfo host_addr, *host_info, *option;
 
@@ -308,35 +309,43 @@ int main(int argc, char *argv[]) {
             // todo: valid_position -> add to opponent board ->
             // custom draw function, perhaps with x's for hits, o's for misses
 	    if (strike_indicator == 0) {
-                opp_board[request.data.coord[0]][request.data.coord[1]] = 'x';
+                opp_board[fire_x][fire_y] = 'x';
             } else if (strike_indicator == 1) {
-                opp_board[request.data.coord[0]][request.data.coord[1]] = 'o';
+                opp_board[fire_x][fire_y] = 'o';
             }
             strike_indicator = 0; // reset indicator for next run through
+
             // this is where we can do a fire
             // todo: probably want a while input loop like in placing ships
             request.opcode = FIRE;
             print_board(opp_board);
             printf("Ship's cannons primed for firing. Issue the command!\n");
 
-            printf("Enter target x [column] coordinate (0 through 9)  : ");
-            scanf("%d", &strike_target);
-            while (strike_target < 0 || strike_target > 9) {
-                printf("Invalid coordinate. Enter an integer (0 through 9): ");
+            do {
+	        invalid_location = 0;
+                printf("Enter target x [column] coordinate (0 through 9)  : ");
                 scanf("%d", &strike_target);
-            }
-            request.data.coord[0] = strike_target;
+                while (strike_target < 0 || strike_target > 9) {
+                    printf("Invalid coordinate. Enter an int (0 through 9): ");
+                    scanf("%d", &strike_target);
+                }
+                fire_x = request.data.coord[0] = strike_target;
 
-            printf("Enter target y [row] coordinate (A through J)     : ");
-            scanf(" %c", (char*)&strike_target);
-	    strike_target = toupper(strike_target);
-            while (strike_target < 'A' || strike_target > 'J') {
-                printf("Invalid coordinate. Enter a char (A through J)    : ");
+                printf("Enter target y [row] coordinate (A through J)     : ");
                 scanf(" %c", (char*)&strike_target);
-                strike_target = toupper(strike_target);
-            }
+	        strike_target = toupper(strike_target);
+                while (strike_target < 'A' || strike_target > 'J') {
+                    printf("Invalid coordinate. Enter a char (A through J): ");
+                    scanf(" %c", (char*)&strike_target);
+                    strike_target = toupper(strike_target);
+                }
+                fire_y = request.data.coord[1] = strike_target - 'A';
 
-            request.data.coord[1] = strike_target - 'A';
+                if (opp_board[fire_x][fire_y] != 0) {
+                    printf("ALERT: Previously shot location; try again!\n");
+                    invalid_location = 1;
+                }
+            } while (invalid_location == 1);
             req_len = pack_request(req_buf, &request);
             send(sockfd, req_buf, req_len, 0);
             break;
