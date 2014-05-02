@@ -27,8 +27,9 @@ int main(int argc, char *argv[]) {
     int addr, resp_len, index;
     int ships_to_place = NUMBER_SHIPS;
     board_t client_board = {};
-    board_t opponent_board = {};
-    int ship_placement;
+    board_t opp_board = {};
+    int ship_placement, strike_target;
+    int strike_indicator = -1;
 
     struct addrinfo host_addr, *host_info, *option;
 
@@ -229,7 +230,7 @@ int main(int argc, char *argv[]) {
         scanf(" %c", (char*)&ship_placement);
         ship_placement = toupper(ship_placement);
         while (ship_placement < 'A' || ship_placement > 'J') {
-            printf("Invalid coordinate. Enter a character between A and J: ");
+            printf("Invalid coordinate. Enter a character between A and J : ");
             scanf(" %c", (char*)&ship_placement);
             ship_placement = toupper(ship_placement);
         }
@@ -300,16 +301,42 @@ int main(int argc, char *argv[]) {
             printf("Hit nothing...\n");
             // todo: add hit marker to opponent board
             // xxx: note fall through, might not be what we want
+            strike_indicator = 1; // 1 designates miss, by default 0 hit
         case OK:
-            // this is where we can do a fire
-            request.opcode = FIRE;
-
-            // todo: probably want a while input loop like in placing ships
+	    // comparing with 0 and 1 allows compare with other int
+            // if the first run through, no hit or miss result
             // todo: valid_position -> add to opponent board ->
             // custom draw function, perhaps with x's for hits, o's for misses
-            print_board(opponent_board);
+	    if (strike_indicator == 0) {
+                opp_board[request.data.coord[0]][request.data.coord[1]] = 'x';
+            } else if (strike_indicator == 1) {
+                opp_board[request.data.coord[0]][request.data.coord[1]] = 'o';
+            }
+            strike_indicator = 0; // reset indicator for next run through
+            // this is where we can do a fire
+            // todo: probably want a while input loop like in placing ships
+            request.opcode = FIRE;
+            print_board(opp_board);
+            printf("Ship's cannons primed for firing. Issue the command!\n");
 
+            printf("Enter target x [column] coordinate (0 through 9)  : ");
+            scanf("%d", &strike_target);
+            while (strike_target < 0 || strike_target > 9) {
+                printf("Invalid coordinate. Enter an integer (0 through 9): ");
+                scanf("%d", &strike_target);
+            }
+            request.data.coord[0] = strike_target;
 
+            printf("Enter target y [row] coordinate (A through J)     : ");
+            scanf(" %c", (char*)&strike_target);
+	    strike_target = toupper(strike_target);
+            while (strike_target < 'A' || strike_target > 'J') {
+                printf("Invalid coordinate. Enter a char (A through J)    : ");
+                scanf(" %c", (char*)&strike_target);
+                strike_target = toupper(strike_target);
+            }
+
+            request.data.coord[1] = strike_target - 'A';
             req_len = pack_request(req_buf, &request);
             send(sockfd, req_buf, req_len, 0);
             break;
@@ -332,7 +359,7 @@ int main(int argc, char *argv[]) {
         }
     } while (response.opcode != FIN);
 
-    if (count_ship_tiles(opponent_board) == 0)
+    if (count_ship_tiles(opp_board) == 0)
         printf("You Won!\n");
     else
         printf("You lost!\n");
