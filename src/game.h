@@ -30,6 +30,8 @@ typedef enum cell board_t[COLUMNS][ROWS];
 //=============================================================================
 // Returns 0 if board is not full, 1 if full
 int board_full(board_t board);
+// Returns 0 if board has pieces, 1 if empty
+int board_empty(board_t board);
 
 // Counts the number of times ship cells occurs.
 int count_ship_tiles(board_t board);

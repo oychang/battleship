@@ -167,6 +167,7 @@ int main(void)
         int sock = select_wrapper(&master, &nfds, serverfd, &session, request);
         // 0 = first player, 1 = second player, -1 = neither
         int player = (sock == sockets[0] ? 0 : sock == sockets[1] ? 1 : -1);
+        int opponent = (player == -1 ? -1 : player == 0 ? 1 : 0);
         printf("player = %d\n", player);
 
         // if no useful data
@@ -240,9 +241,21 @@ int main(void)
             if (cell_value == EMPTY || cell_value == MISS || cell_value == HIT) {
                 rp.opcode = NOK;
             } else {
-                session.boards[player][rq.data.coord[0]][rq.data.coord[1]] = HIT;
-                rp.opcode = OK;
-                session.current_player = (session.current_player == 0 ? 1 : 0);
+                // should go in other player's board
+                session.boards[opponent][rq.data.coord[0]][rq.data.coord[1]] = HIT;
+
+                // if no more ship pieces, send fins
+                if (board_empty(session.boards[0]) || board_empty(session.boards[1])) {
+                    rp.opcode = FIN;
+                    resp_len = pack_response(response, &rp);
+                    send(sockets[0], response, resp_len, 0);
+                    send(sockets[1], response, resp_len, 0);
+                    session.stage = DONE;
+                    continue;
+                } else {
+                    rp.opcode = OK;
+                    session.current_player = (session.current_player == 0 ? 1 : 0);
+                }
             }
             break;
         case READY:

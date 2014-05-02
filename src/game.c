@@ -2,7 +2,14 @@
 #include "game.h"
 //=============================================================================
 int
-board_full(board_t board) {
+board_empty(board_t board)
+{
+    return count_ship_tiles(board) == 0;
+}
+//=============================================================================
+int
+board_full(board_t board)
+{
     return count_ship_tiles(board) == TOTAL_SHIP_AREA;
 }
 //=============================================================================
